@@ -7,13 +7,28 @@
         android:title="@string/title_home" />
 
     <item
-        android:id="@+id/navigation_dashboard"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="@string/title_dashboard" />
+        android:id = "@+id/navigation_favourites"
+        android:icon="@drawable/ic_dashboard_favourites_black"
+        android:title="Favourites" />
 
     <item
-        android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_notifications" />
+        android:id="@+id/navigation_nearby"
+        android:icon="@drawable/ic_dashboard_nearby_black"
+        android:title="Nearby" />
+
+    <item
+        android:id="@+id/navigation_search"
+        android:icon="@drawable/ic_dashboard_search_black"
+        android:title="Search" />
+
+    <item
+        android:id="@+id/navigation_mrtmap"
+        android:icon="@drawable/ic_dashboard_mrtmap_black"
+        android:title="MRT Map" />
+
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_dashboard_settings_black"
+        android:title="Settings" />
 
 </menu>
