@@ -3,8 +3,9 @@
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
-    <color name="cyan_normal">#FF48B3FF</color>
-    <color name="cyan_light">#FF74C5FF</color>
+    <!--Added Main Colour Schemes-->
+    <color name="cyan_light">#FFACDCFF</color>
+    <color name="cyan_normal">#FF74C5FF</color>
     <color name="cyan_dark">#FF109BFF</color>
 
 
