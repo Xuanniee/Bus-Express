@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Bus Express</string>
+    <string name="favourites_away">Going Out [Favourites]</string>
+    <string name="favourites_back">Coming Back [Favourites]</string>
+    <string name="nearby">Nearby</string>
+    <string name="navbar_description">Main Navigation Menu</string>
+    <string name="more_settings_description">More Settings</string>
+    <string name="search_field_instructions">Provide a bus stop or bus number here!!</string>
+    <string name="search">Search</string>
+    <string name="home_navigation_desc">Home</string>
+    <string name="favourites_navigation_desc">Favourites</string>
+    <string name="nearby_navigation_desc">Nearby</string>
+    <string name="navigation_flavor_text">Only sign in if you wish to backup your data.</string>
+    <string name="navigation_drawer_close_flavor_text">Close the Navigation Drawer</string>
+    <string name="loading_flavor_text">Loading your Bus Details</string>
+    <string name="loading_failed_flavor_text">Cannot retrieve the Bus Timings at this point in time!!</string>
+</resources>
