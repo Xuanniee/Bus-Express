@@ -1,5 +1,7 @@
 package com.example.busexpress.data
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import com.example.busexpress.network.BusApiService
 import com.example.busexpress.network.SingaporeBus
 
@@ -13,12 +15,13 @@ class DefaultSingaporeBusRepository(
 ): SingaporeBusRepository {
     override suspend fun getBusTimings(): List<SingaporeBus> {
         return busApiService.getTimingsOfBusStop(
-            accept = "application/json",
-            AccountKey = "LJYAC7aJQAC4UDbIAPNEMQ==",
             BusStopCode = "65199"
         )
     }
 }
+//
+//accept = "application/json",
+//AccountKey = "LJYAC7aJQAC4UDbIAPNEMQ==",
 
 
 

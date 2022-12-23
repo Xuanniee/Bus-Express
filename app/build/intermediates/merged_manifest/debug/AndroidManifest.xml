@@ -28,7 +28,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="true"
-        android:theme="@style/Theme.BusExpress" >
+        android:theme="@style/Theme.BusExpress"
+        android:usesCleartextTraffic="true" >
         <activity
             android:name="com.example.busexpress.MainActivity"
             android:exported="true"

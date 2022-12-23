@@ -5,6 +5,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SingaporeBus(
+    @SerialName(value = "BusStopCode")
+    val busStopCode: String,
+
+    @SerialName(value = "Services")
+    val services: List<SingaporeBusServices>,
+)
+
+@Serializable
+data class SingaporeBusServices(
     @SerialName(value = "ServiceNo")
     val busServiceNumber: String,
 

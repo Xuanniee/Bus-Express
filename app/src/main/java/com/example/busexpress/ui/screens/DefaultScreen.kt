@@ -93,7 +93,10 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
  * The home screen displaying result of fetching photos.
  */
 @Composable
-fun ResultScreen(busUiState: BusUiState, modifier: Modifier = Modifier) {
+fun ResultScreen(
+    busUiState: BusUiState,
+    modifier: Modifier = Modifier
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize()

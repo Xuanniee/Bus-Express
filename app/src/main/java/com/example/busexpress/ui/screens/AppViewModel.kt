@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
+import com.example.busexpress.network.SingaporeBus
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -42,14 +43,14 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                 // Within this Scope, use the Repository, not the Object to access the Data, abstracting the data within the Data Layer
                 val listResult = singaporeBusRepository.getBusTimings()
                 // Assign results from backend server to marsUiState {A mutable state object that represents the status of the most recent web request}
-                BusUiState.Success(listResult.toString())
+                BusUiState.Success(listResult)
             }
             catch (e: IOException) {
                 BusUiState.Error
             }
-            catch (e: HttpException) {
-                BusUiState.Error
-            }
+//            catch (e: HttpException) {
+//                BusUiState.Error
+//            }
         }
     }
 
@@ -64,7 +65,6 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         }
     }
 
-//
 //    private val _uiState = MutableStateFlow(AppUiState(65199))
 //    val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
@@ -73,7 +73,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 // Simply saving the UiState as a Mutable State prevents us from saving the different status
 // like Loading, Error, and Success
 sealed interface BusUiState {
-    data class Success(val timings: String) : BusUiState
+    data class Success(val timings: List<SingaporeBus>) : BusUiState
     // The 2 States below need not set new data and create new objects, which is why an object is sufficient for the web response
     object Error: BusUiState
     object Loading: BusUiState
