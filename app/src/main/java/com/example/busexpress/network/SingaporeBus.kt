@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SingaporeBus(
+    @SerialName(value = "odata.metadata")
+    val metaData: String,
+
     @SerialName(value = "BusStopCode")
     val busStopCode: String,
 
@@ -16,6 +19,9 @@ data class SingaporeBus(
 data class SingaporeBusServices(
     @SerialName(value = "ServiceNo")
     val busServiceNumber: String,
+
+    @SerialName(value = "Operator")
+    val busOperator: String,
 
     // Bus Arrival Timings
     @SerialName(value = "NextBus")
@@ -31,14 +37,24 @@ data class SingaporeBusServices(
 @Serializable
 data class NextBusTiming(
     // Date-Time expressed in the UTC standard, GMT+8 for Singapore Standard Time (SST)
-    @SerialName(value = "EstimatedArrival")
-    val estimatedArrival: String,
-
     @SerialName(value = "OriginCode")
     val startingBusStop: String,
 
     @SerialName(value = "DestinationCode")
     val endingBusStop: String,
+
+    @SerialName(value = "EstimatedArrival")
+    val estimatedArrival: String,
+
+    // Bus Approximate Location
+    @SerialName(value = "Latitude")
+    val latitude: String,
+
+    @SerialName(value = "Longitude")
+    val longitude: String,
+
+    @SerialName(value = "VisitNumber")
+    val visitNumber: String,
 
     // Current Bus Occupancy Levels
     @SerialName(value = "Load")
@@ -51,11 +67,4 @@ data class NextBusTiming(
     // Bus Type
     @SerialName(value = "Type")
     val vehicleType: String,
-
-    // Bus Approximate Location
-    @SerialName(value = "Latitude")
-    val latitude: String,
-
-    @SerialName(value = "Longitude")
-    val longitude: String
 )

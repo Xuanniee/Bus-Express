@@ -48,9 +48,9 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
             catch (e: IOException) {
                 BusUiState.Error
             }
-//            catch (e: HttpException) {
-//                BusUiState.Error
-//            }
+            catch (e: HttpException) {
+                BusUiState.Error
+            }
         }
     }
 
