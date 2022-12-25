@@ -1,8 +1,10 @@
 package com.example.busexpress.ui.screens
 
+import android.graphics.Paint.Align
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,12 +24,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.busexpress.R
 
 @Composable
 fun DefaultScreen(
     busUiState: BusUiState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    appViewModel: AppViewModel = viewModel(),
+    navController: NavController
 ) {
     // Mutable State for User Input
     var userInput = remember {
@@ -47,15 +53,17 @@ fun DefaultScreen(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Search
             ),
-            keyboardActions = KeyboardActions(
-                // Move to Search Results
-            )
+            onKeyboardSearch = {
+                appViewModel.getBusTimings(userInput.value.text)
+//                navController.navigate(BusExpressScreen.Search.name)
+            }
         )
 
         when(busUiState) {
             is BusUiState.Success -> ResultScreen(busUiState = busUiState)
             is BusUiState.Loading -> LoadingScreen()
             is BusUiState.Error -> ErrorScreen()
+            else -> ErrorScreen()
         }
 
 
@@ -97,6 +105,15 @@ fun ResultScreen(
     busUiState: BusUiState,
     modifier: Modifier = Modifier
 ) {
+    // Results of Search
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(all = 10.dp)
+    ) {
+
+    }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier.fillMaxSize()
@@ -112,54 +129,76 @@ fun SearchView(
     state: MutableState<TextFieldValue>,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions,
-    keyboardActions: KeyboardActions,
+    onKeyboardSearch: () -> Unit,
 ) {
-    TextField(
-        value = state.value,
-        onValueChange = {value ->
-            state.value = value
-        },
-        label = {
-            if (state.value == TextFieldValue("")) {
-                Text(
-                    stringResource(id = label),
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.h6
-                )
-            }
-        },
-        modifier = modifier
-            .fillMaxWidth(),
-        singleLine = true,
-        // Search Icon at the Start for Aesthetics
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                modifier = Modifier.padding(10.dp)
-            )
-        },
-        // Cancel Button to delete all Input
-        trailingIcon = {
-            // Icon appears iif the Search Field is not Empty
-            if (state.value != TextFieldValue("")) {
-                IconButton(onClick = {
-                    // Clear the Search Field
-                    state.value = TextFieldValue("")
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "Delete all User Input",
-                        modifier = Modifier.padding(10.dp)
+    Column() {
+        TextField(
+            value = state.value,
+            onValueChange = {value ->
+                state.value = value
+            },
+            label = {
+                if (state.value == TextFieldValue("")) {
+                    Text(
+                        stringResource(id = label),
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.h6
                     )
                 }
+            },
+            modifier = modifier
+                .fillMaxWidth(),
+            singleLine = true,
+            // Search Icon at the Start for Aesthetics
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = null,
+                    modifier = Modifier.padding(10.dp)
+                )
+            },
+            // Cancel Button to delete all Input
+            trailingIcon = {
+                // Icon appears iif the Search Field is not Empty
+                if (state.value != TextFieldValue("")) {
+                    IconButton(onClick = {
+                        // Clear the Search Field
+                        state.value = TextFieldValue("")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Delete all User Input",
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                }
+            },
+            keyboardActions = KeyboardActions(
+                onSearch = { onKeyboardSearch() }
+            ),
+            keyboardOptions = keyboardOptions,
+            shape = RoundedCornerShape(25)
+        )
+
+        Row() {
+            Spacer(modifier = modifier.weight(3f))
+            // Button for User to Click to begin Search
+            Button(
+                onClick = {
+                    // TODO Pass the User Query to the Search Function
+                    onKeyboardSearch()
+                },
+                modifier = modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(2.dp)
+                    .weight(1f),
+            ) {
+                Text(text = stringResource(R.string.search_button_flavor_text))
             }
-        },
-        keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions,
-        shape = RoundedCornerShape(25)
-    )
+        }
+    }
+
 }
 
 

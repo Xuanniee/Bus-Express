@@ -14,4 +14,6 @@
     <string name="navigation_drawer_close_flavor_text">Close the Navigation Drawer</string>
     <string name="loading_flavor_text">Loading your Bus Details</string>
     <string name="loading_failed_flavor_text">Cannot retrieve the Bus Timings at this point in time!!</string>
+    <string name="search_button_flavor_text">Search</string>
+    <string name="bus_stop_expand_more_desc">Expand for all the Buses available at the Bus Stop.</string>
 </resources>

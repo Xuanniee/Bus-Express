@@ -211,6 +211,7 @@ string on
 string range_end
 string range_start
 string search
+string search_button_flavor_text
 string search_field_instructions
 string selected
 string status_bar_notification_info_overflow

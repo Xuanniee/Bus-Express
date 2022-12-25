@@ -31,17 +31,35 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
      * Call init so we can display status immediately.
      */
     init {
-        getBusTimings()
+        getBusTimings(null)
     }
 
-    private fun getBusTimings() {
+    fun getBusTimings(userInput: String?) {
+        // Determine if UserInput is a BusStopCode
+        var busStopCode: String?
+        var busServiceNumber: String?
+        val userInputLength = userInput?.length ?: 0
+        if (userInputLength == 5) {
+            // Bus Stop Code
+            busStopCode = userInput
+            busServiceNumber = null
+        }
+        else {
+            // Bus Service Number
+            busStopCode = null
+            busServiceNumber = userInput
+        }
+
         // Launch the Coroutine using a ViewModelScope
         viewModelScope.launch {
             busUiState = BusUiState.Loading
             // Might have Connectivity Issues
             busUiState = try {
                 // Within this Scope, use the Repository, not the Object to access the Data, abstracting the data within the Data Layer
-                val listResult = singaporeBusRepository.getBusTimings()
+                val listResult = singaporeBusRepository.getBusTimings(
+                    busServiceNumber = busServiceNumber,
+                    busStopCode = busStopCode
+                )
                 // Assign results from backend server to marsUiState {A mutable state object that represents the status of the most recent web request}
                 BusUiState.Success(listResult)
             }

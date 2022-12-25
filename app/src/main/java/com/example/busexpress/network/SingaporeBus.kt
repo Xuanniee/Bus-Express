@@ -69,3 +69,36 @@ data class NextBusTiming(
     val vehicleType: String?,
 )
 
+// Data Class for Bus Stops
+@Serializable
+data class BusStop(
+    @SerialName(value = "odata.metadata")
+    val metaData: String,
+
+    // Can be Null if no Bus Stops
+    val value: List<BusStopValue?>
+)
+
+@Serializable
+data class BusStopValue(
+    @SerialName(value = "BusStopCode")
+    val busStopCode: String,
+
+    @SerialName(value = "RoadName")
+    val busStopRoadName: String,
+
+    @SerialName(value = "Description")
+    val busStopDescription: String,
+
+    @SerialName(value = "Latitude")
+    val latitude: Int,
+
+    @SerialName(value = "Longitude")
+    val longitude: Int,
+)
+
+
+
+
+
+

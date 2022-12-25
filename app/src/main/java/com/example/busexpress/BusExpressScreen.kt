@@ -249,7 +249,9 @@ fun BusExpressApp(
             // 1. Default Screen (For Nearby Bus-stops)
             composable(route = BusExpressScreen.Default.name) {
                 DefaultScreen(
-                    busUiState = viewModel.busUiState
+                    busUiState = viewModel.busUiState,
+                    appViewModel = viewModel,
+                    navController = navController
                 )
             }
 

@@ -21,6 +21,7 @@
     <string name="nearby">Nearby</string>
     <string name="nearby_navigation_desc">Nearby</string>
     <string name="search">Search</string>
+    <string name="search_button_flavor_text">Search</string>
     <string name="search_field_instructions">Provide a bus stop or bus number here!!</string>
     <style name="Theme.BusExpress" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/purple_700</item>

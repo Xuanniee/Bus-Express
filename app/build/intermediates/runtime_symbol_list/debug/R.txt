@@ -210,6 +210,7 @@ int string on 0x7f090018
 int string range_end 0x7f090019
 int string range_start 0x7f09001a
 int string search 0x7f09001b
+int string search_button_flavor_text 0x7f090021
 int string search_field_instructions 0x7f09001c
 int string selected 0x7f09001d
 int string status_bar_notification_info_overflow 0x7f09001e

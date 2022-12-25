@@ -26,6 +26,7 @@ string navigation_flavor_text
 string nearby
 string nearby_navigation_desc
 string search
+string search_button_flavor_text
 string search_field_instructions
 style Theme.BusExpress
 xml backup_rules

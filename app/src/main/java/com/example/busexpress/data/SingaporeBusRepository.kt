@@ -1,28 +1,33 @@
 package com.example.busexpress.data
 
-import android.content.ContentValues.TAG
-import android.util.Log
+
 import com.example.busexpress.network.BusApiService
+import com.example.busexpress.network.BusStop
 import com.example.busexpress.network.SingaporeBus
 
 
 interface SingaporeBusRepository {
-    suspend fun getBusTimings(): SingaporeBus
+    // Bus Timings
+    suspend fun getBusTimings(busStopCode: String?, busServiceNumber: String?): SingaporeBus
+
+    // Bus Details
+    suspend fun getBusDetails(): BusStop
 }
 
 class DefaultSingaporeBusRepository(
     private val busApiService: BusApiService
 ): SingaporeBusRepository {
-    override suspend fun getBusTimings(): SingaporeBus {
+    override suspend fun getBusTimings(busStopCode: String?, busServiceNumber: String?): SingaporeBus {
+        // TODO Replace with User Query
         return busApiService.getTimingsOfBusStop(
-            BusStopCode = "65199"
+            BusStopCode = busStopCode,
+            ServiceNo = busServiceNumber
         )
     }
+
+    override suspend fun getBusDetails(): BusStop {
+        return busApiService.getDetailsOfBusStop()
+    }
 }
-
-//accept = "application/json",
-//AccountKey = "LJYAC7aJQAC4UDbIAPNEMQ==",
-
-
 
 
