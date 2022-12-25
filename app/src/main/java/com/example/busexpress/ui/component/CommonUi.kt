@@ -45,9 +45,9 @@ fun BusStopComposable(
         // Name of Bus Stop & Bus Stop Code
         Column() {
             // Description of Bus Stop
-            Text(
-                text = ,
-            )
+//            Text(
+//                text = ,
+//            )
 
             // Bus Stop Road & Code
 

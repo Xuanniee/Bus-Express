@@ -8,6 +8,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="white">#FFFFFFFF</color>
     <string name="app_name">Bus Express</string>
+    <string name="bus_stop_expand_more_desc">Expand for all the Buses available at the Bus Stop.</string>
     <string name="favourites_away">Going Out [Favourites]</string>
     <string name="favourites_back">Coming Back [Favourites]</string>
     <string name="favourites_navigation_desc">Favourites</string>

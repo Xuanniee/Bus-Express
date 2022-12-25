@@ -13,6 +13,7 @@ drawable loading_img
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
+string bus_stop_expand_more_desc
 string favourites_away
 string favourites_back
 string favourites_navigation_desc

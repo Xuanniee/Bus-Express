@@ -185,6 +185,7 @@ mipmap ic_launcher
 mipmap ic_launcher_round
 string androidx_startup
 string app_name
+string bus_stop_expand_more_desc
 string close_drawer
 string close_sheet
 string default_error_message
