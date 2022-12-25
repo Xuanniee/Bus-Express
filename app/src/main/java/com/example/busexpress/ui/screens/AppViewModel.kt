@@ -73,7 +73,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 // Simply saving the UiState as a Mutable State prevents us from saving the different status
 // like Loading, Error, and Success
 sealed interface BusUiState {
-    data class Success(val timings: List<SingaporeBus>) : BusUiState
+    data class Success(val timings: SingaporeBus) : BusUiState
     // The 2 States below need not set new data and create new objects, which is why an object is sufficient for the web response
     object Error: BusUiState
     object Loading: BusUiState
