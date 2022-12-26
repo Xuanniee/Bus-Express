@@ -1,10 +1,8 @@
 package com.example.busexpress.ui.screens
 
-import android.graphics.Paint.Align
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,14 +24,19 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.busexpress.BusExpressApp
+import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
+import com.example.busexpress.network.SingaporeBus
+import com.example.busexpress.ui.component.BusStopComposable
 
 @Composable
 fun DefaultScreen(
     busUiState: BusUiState,
     modifier: Modifier = Modifier,
     appViewModel: AppViewModel = viewModel(),
-    navController: NavController
+    busArrivalsJson: SingaporeBus,
+//    navController: NavController
 ) {
     // Mutable State for User Input
     var userInput = remember {
@@ -58,9 +61,10 @@ fun DefaultScreen(
 //                navController.navigate(BusExpressScreen.Search.name)
             }
         )
+//        val busArrivalsJson = appViewModel.getBusTimings(userInput = userInput.value.text)
 
         when(busUiState) {
-            is BusUiState.Success -> ResultScreen(busUiState = busUiState)
+            is BusUiState.Success -> ResultScreen(busUiState = busUiState, busArrivalsJSON = busArrivalsJson)
             is BusUiState.Loading -> LoadingScreen()
             is BusUiState.Error -> ErrorScreen()
             else -> ErrorScreen()
@@ -103,23 +107,23 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 @Composable
 fun ResultScreen(
     busUiState: BusUiState,
-    modifier: Modifier = Modifier
+    busArrivalsJSON: SingaporeBus,
+    modifier: Modifier = Modifier,
 ) {
+
+    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
     // Results of Search
-    LazyColumn(
+    BusStopComposable(
+        busArrivalsJSON = busArrivalsJSON,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(all = 10.dp)
-    ) {
-
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(busUiState.toString())
-    }
+    )
+    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+//    Box(
+//        contentAlignment = Alignment.Center,
+//        modifier = modifier.fillMaxSize()
+//    ) {
+//        Text(busUiState.toString())
+//    }
 }
 
 

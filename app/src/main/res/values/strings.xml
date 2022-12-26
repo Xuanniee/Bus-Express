@@ -16,4 +16,6 @@
     <string name="loading_failed_flavor_text">Cannot retrieve the Bus Timings at this point in time!!</string>
     <string name="search_button_flavor_text">Search</string>
     <string name="bus_stop_expand_more_desc">Expand for all the Buses available at the Bus Stop.</string>
+    <string name="temp_bus_stop_name">Bus Stop Name</string>
+    <string name="refresh_busCard_desc">Refresh to update the bus timings!!</string>
 </resources>

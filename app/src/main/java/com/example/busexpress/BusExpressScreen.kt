@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.twotone.Email
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
 import com.example.busexpress.ui.theme.NavigationDrawer
@@ -236,7 +238,7 @@ fun BusExpressApp(
             )
         }
     ) { innerPadding ->
-//        val uiState by viewModel.uiState.collectAsState()
+        val busServiceUiState by viewModel.busServiceUiState.collectAsState()
 
         // NavHost Composable for Navigating between Screens
         NavHost(
@@ -250,8 +252,12 @@ fun BusExpressApp(
             composable(route = BusExpressScreen.Default.name) {
                 DefaultScreen(
                     busUiState = viewModel.busUiState,
-                    appViewModel = viewModel,
-                    navController = navController
+                    busArrivalsJson = SingaporeBus(
+                        metaData = busServiceUiState.metaData,
+                        busStopCode = busServiceUiState.busStopCode,
+                        services = busServiceUiState.services
+                    ),
+                    appViewModel = viewModel
                 )
             }
 

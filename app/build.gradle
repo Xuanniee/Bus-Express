@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.busexpress"
-        minSdk 21
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -60,6 +60,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-runtime-ktx:2.5.3'
     implementation 'androidx.activity:activity-compose:1.6.1'
     implementation "androidx.navigation:navigation-compose:2.5.3"
+    // Material Theme Icons
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     // Retrofit with Kotlin serialization Converter not Scalar Converter

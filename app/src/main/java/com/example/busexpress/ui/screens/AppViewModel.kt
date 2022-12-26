@@ -12,6 +12,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
 import com.example.busexpress.network.SingaporeBus
+import com.example.busexpress.network.SingaporeBusServices
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -22,6 +26,9 @@ import java.io.IOException
  * pickup date. It also knows how to calculate the total price based on these order details.
  */
 class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): ViewModel() {
+    private val _busServiceUiState = MutableStateFlow(SingaporeBus())
+    val busServiceUiState: StateFlow<SingaporeBus> = _busServiceUiState.asStateFlow()
+
     /** The mutable State that stores the status of the most recent request */
     var busUiState: BusUiState by mutableStateOf(BusUiState.Loading)     // Loading as Default Value
         // Setter is private to protect writes to the busUiState
@@ -50,18 +57,25 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
             busServiceNumber = userInput
         }
 
+        //var listResult: SingaporeBus = SingaporeBus(metaData = "Initialised", busStopCode = "Initialised")
         // Launch the Coroutine using a ViewModelScope
         viewModelScope.launch {
             busUiState = BusUiState.Loading
             // Might have Connectivity Issues
             busUiState = try {
                 // Within this Scope, use the Repository, not the Object to access the Data, abstracting the data within the Data Layer
-                val listResult = singaporeBusRepository.getBusTimings(
+                var listResult = singaporeBusRepository.getBusTimings(
                     busServiceNumber = busServiceNumber,
                     busStopCode = busStopCode
                 )
-                // Assign results from backend server to marsUiState {A mutable state object that represents the status of the most recent web request}
-                BusUiState.Success(listResult)
+
+                _busServiceUiState.value = SingaporeBus(
+                                                metaData = listResult.metaData,
+                                                busStopCode = listResult.busStopCode,
+                                                services = listResult.services
+                                            )
+                // Assign results from backend server to busUiState {A mutable state object that represents the status of the most recent web request}
+                BusUiState.Success(busTimings = listResult)
             }
             catch (e: IOException) {
                 BusUiState.Error
@@ -83,15 +97,12 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         }
     }
 
-//    private val _uiState = MutableStateFlow(AppUiState(65199))
-//    val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
-
 }
 
 // Simply saving the UiState as a Mutable State prevents us from saving the different status
 // like Loading, Error, and Success
 sealed interface BusUiState {
-    data class Success(val timings: SingaporeBus) : BusUiState
+    data class Success(val busTimings: SingaporeBus) : BusUiState
     // The 2 States below need not set new data and create new objects, which is why an object is sufficient for the web response
     object Error: BusUiState
     object Loading: BusUiState
