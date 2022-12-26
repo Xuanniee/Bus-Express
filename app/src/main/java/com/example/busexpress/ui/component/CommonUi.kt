@@ -1,6 +1,7 @@
 package com.example.busexpress.ui.component
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -18,10 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.example.busexpress.R
 import com.example.busexpress.network.*
 import java.text.SimpleDateFormat
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Period
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -90,7 +88,7 @@ fun BusStopComposable(
                     .padding(all = 10.dp)
             ) {
                 items(currentBusStopServices) { currentBusStopService ->
-                    ExpandedBusStop(currentBusStopService = currentBusStopService)
+                    ExpandedBusStop(currentBusStopService = currentBusStopService, modifier = Modifier.padding(3.dp))
                 }
             }
 
@@ -98,6 +96,13 @@ fun BusStopComposable(
     }
 
 
+
+}
+
+@Composable
+fun BusComposableMenuButton(
+
+) {
 
 }
 
@@ -138,23 +143,44 @@ fun ExpandedBusStop(
 
 ) {
     // Determine the Current Timestamp as LocalDateTime
-    var currentTimestamp = LocalDateTime.now() //.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"))
-    val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ")
-//    datetimeFormatter.setTimeZone(TimeZone.getTimeZone("GMT+14"))
+    var currentTimestamp = LocalDateTime.now()
+    val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
     var nextBusEtaArray = Array<String>(3) { "" }
     var nextBusOccupancyArray = Array<String>(3) { "" }
 
+    // Array holding the Next 3 Bus Objects
+    val nextBusArray = arrayListOf<NextBusTiming>(
+        currentBusStopService.nextBus1,
+        currentBusStopService.nextBus2,
+        currentBusStopService.nextBus3
+    )
+
     val currentBusService = currentBusStopService.busServiceNumber
 
-
+    // For Loop for the Next 3 Buses
     for (i: Int in 0..2) {
         // Determining the ETA of the Next 3 Buses in Minutes
-        val nextBus = currentBusStopService.nextBus1
+        val nextBus = nextBusArray[i]
         val nextBusTimestampString = nextBus.estimatedArrival  // In the Event there are no longer any buses
-        val nextBusTimestamp = LocalDateTime.parse(nextBusTimestampString, datetimeFormatter)
-        val nextBusETA = Duration.between(currentTimestamp, nextBusTimestamp)
-        // Round down to Nearest Minute and Convert into a String
-        nextBusEtaArray[i] = nextBusETA.toString().toInt().toString()
+
+        // Check if Bus Services are still available
+        if (nextBusTimestampString == "") {
+            // Unavailable Bus Service
+            nextBusEtaArray[i] = "NA"
+        }
+        else {
+            // Round down to Nearest Minute and Convert into a String
+            val nextBusTimestamp = LocalDateTime.parse(nextBusTimestampString, datetimeFormatter)
+            val nextBusETA = Duration.between(currentTimestamp, nextBusTimestamp).toMinutes()
+            // If less than a minute, change to Arriving
+            if (nextBusETA < 1) {
+                nextBusEtaArray[i] = "Arr"
+            }
+            else {
+                nextBusEtaArray[i] = nextBusETA.toString() + " mins"
+            }
+
+        }
 
         // Determining the Occupancy Rates of the Next 3 Buses
         val nextBusOccupancy = nextBus.busOccupancyLevels
@@ -174,7 +200,9 @@ fun ExpandedBusStop(
         Spacer(modifier = modifier.weight(1f))
 
         // Waiting Time + Occupancy Rate for each Incoming Bus
-        Column() {
+        Column(
+            modifier = modifier.weight(1f)
+        ) {
             Text(
                 text = nextBusEtaArray[0],
                 style = MaterialTheme.typography.body2
@@ -188,7 +216,9 @@ fun ExpandedBusStop(
 
         }
 
-        Column() {
+        Column(
+            modifier = modifier.weight(1f)
+        ) {
             Text(
                 text = nextBusEtaArray[1],
                 style = MaterialTheme.typography.body2
@@ -196,12 +226,14 @@ fun ExpandedBusStop(
 
             // TODO Replace with Infographic
             Text(
-                text = nextBusOccupancyArray[0],
+                text = nextBusOccupancyArray[1],
                 style = MaterialTheme.typography.body2
             )
         }
 
-        Column() {
+        Column(
+            modifier = modifier.weight(1f)
+        ) {
             Text(
                 text = nextBusEtaArray[2],
                 style = MaterialTheme.typography.body2
@@ -209,13 +241,12 @@ fun ExpandedBusStop(
 
             // TODO Replace with Infographic
             Text(
-                text = nextBusOccupancyArray[0],
+                text = nextBusOccupancyArray[2],
                 style = MaterialTheme.typography.body2
             )
         }
     }
     Divider(thickness = 2.dp)
-
 }
 
 

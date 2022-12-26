@@ -58,7 +58,9 @@ fun DefaultScreen(
             ),
             onKeyboardSearch = {
                 appViewModel.getBusTimings(userInput.value.text)
-//                navController.navigate(BusExpressScreen.Search.name)
+                // Close the Onscreen Keyboard
+
+
             }
         )
 //        val busArrivalsJson = appViewModel.getBusTimings(userInput = userInput.value.text)
