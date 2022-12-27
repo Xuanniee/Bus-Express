@@ -18,4 +18,11 @@
     <string name="bus_stop_expand_more_desc">Expand for all the Buses available at the Bus Stop.</string>
     <string name="temp_bus_stop_name">Bus Stop Name</string>
     <string name="refresh_busCard_desc">Refresh to update the bus timings!!</string>
+    <string name="seats_avail_content_desc">Seats Available in Bus</string>
+    <string name="standing_avail_content_desc">Standing Available in Bus</string>
+    <string name="limited_standing_content_desc">Limited Standing in Bus</string>
+    <string name="single_deck_bus_type">Single</string>
+    <string name="double_deck_bus_type">Double</string>
+    <string name="bendy_bus_type">Bendy</string>
+    <string name="bus_composable_menu_desc">Additional Menu Options</string>
 </resources>

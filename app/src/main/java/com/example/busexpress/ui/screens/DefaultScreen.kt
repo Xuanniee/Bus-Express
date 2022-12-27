@@ -149,7 +149,9 @@ fun SearchView(
                         stringResource(id = label),
                         modifier = Modifier
                             .fillMaxWidth(),
-                        style = MaterialTheme.typography.h6
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onBackground,
+                        maxLines = 1
                     )
                 }
             },
