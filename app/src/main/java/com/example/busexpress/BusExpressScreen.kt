@@ -303,8 +303,6 @@ fun BusExpressApp(
                 SearchResultScreen()
             }
 
-
-
         }
 
 

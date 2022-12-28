@@ -1,5 +1,6 @@
 package com.example.busexpress.ui.component
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,8 +31,8 @@ fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
     busStopDetailsJSON: BusStopValue,
     busRoutes: BusRoutes,
-    busServiceBool: Boolean,
-    appViewModel: AppViewModel = viewModel(),
+//    busServiceBool: Boolean,
+//    appViewModel: AppViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
@@ -39,7 +40,7 @@ fun BusStopComposable(
     val currentBusStopServices: List<SingaporeBusServices> = busArrivalsJSON.services
 
     // Bus Route Details
-    val busRouteArray: List<BusStopInRoute> = busRoutes.busRouteArray
+//    val busRouteArray: List<BusStopInRoute> = busRoutes.busRouteArray
 
     // Store the Variable State if Bus is Expanded
     var expanded by remember { mutableStateOf(false) }
@@ -101,20 +102,31 @@ fun BusStopComposable(
                     .padding(all = 10.dp)
             ) {
                 // Shows Arrival Timing when User provides Bus Stop Code
-                if (!busServiceBool) {
-                    items(currentBusStopServices) { currentBusStopService ->
-                        ExpandedBusStop(
-                            currentBusStopService = currentBusStopService,
-                            modifier = Modifier.padding(3.dp)
-                        )
-                    }
+                items(currentBusStopServices) { currentBusStopService ->
+                    ExpandedBusStop(
+                        currentBusStopService = currentBusStopService,
+                        modifier = Modifier.padding(3.dp)
+                    )
                 }
-                // Arrival Timing for Bus Service Numbers
-                else {
-                    items(busRouteArray) { currentBusStopInRoute ->
-                        ExpandedBusServices(currentBusStop = currentBusStopInRoute)
-                    }
-                }
+//                if (!busServiceBool) {
+//                    items(currentBusStopServices) { currentBusStopService ->
+//                        ExpandedBusStop(
+//                            currentBusStopService = currentBusStopService,
+//                            modifier = Modifier.padding(3.dp)
+//                        )
+//                    }
+//                }
+//                // Arrival Timing for Bus Service Numbers
+//                else {
+//                    items(busRouteArray) { currentBusStopInRoute ->
+//
+//                        ExpandedBusServices(
+//                            currentBusStop = currentBusStopInRoute,
+//                            busStopServices = currentBusStopServices,
+//                            appViewModel = appViewModel
+//                        )
+//                    }
+//                }
             }
 
         }
@@ -124,27 +136,16 @@ fun BusStopComposable(
 @Composable
 fun ExpandedBusServices(
     currentBusStop: BusStopInRoute,
-    appViewModel: AppViewModel = viewModel(),
-    modifier: Modifier = Modifier
+    busStopServices: List<SingaporeBusServices>,
+    appViewModel: AppViewModel,
 ) {
     // Get Current Bus Stop Code and Use it to get the Timings of all the Buses Available at the Bus Stop
     val currentBusStopCode = currentBusStop.busStopCode
     appViewModel.getBusTimings(currentBusStopCode)
 
+    // For Loop for all the Buses available at Bus Stop
+    val busStopServicesLength = busStopServices.size - 1
 
-    // Array holding the Next 3 Bus Objects
-    val nextBusArray = arrayListOf(
-        currentBusStopService.nextBus1,
-        currentBusStopService.nextBus2,
-        currentBusStopService.nextBus3
-    )
-
-    val nextBusEtaArray = determineTimeArrival(nextBusArray = nextBusArray)
-    val nextBusOccupancyArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyArray
-    val nextBusOccupancyDescArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyDescArray
-    val nextBusWheelchairArray = determineWheelchairAccessibility(nextBusArray = nextBusArray)
-    val nextBusTypeArray = determineTypeBus(nextBusArray = nextBusArray)
-    val currentBusService = currentBusStop.serviceNo
 
 }
 

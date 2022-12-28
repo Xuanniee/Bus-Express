@@ -1,6 +1,5 @@
 package com.example.busexpress.ui.screens
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -24,9 +23,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.example.busexpress.BusExpressApp
-import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
 import com.example.busexpress.determineBusServiceorStop
 import com.example.busexpress.network.BusRoutes
@@ -147,18 +143,39 @@ fun ResultScreen(
     appViewModel: AppViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
-
-    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
     // Results of Search
-    BusStopComposable(
-        busArrivalsJSON = busArrivalsJSON,
-        busStopDetailsJSON = busStopDetails,
-        busRoutes = busRoutes,
-        busServiceBool =  busServiceBool,
-        appViewModel = appViewModel,
-        modifier = modifier
-    )
-    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+    if (busServiceBool) {
+        // Bus Services
+        val busRouteArray = busRoutes.busRouteArray
+        val busRouteArrayLength = busRouteArray.size - 1
+
+        for (index in 0..busRouteArrayLength) {
+            Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+            BusStopComposable(
+                busArrivalsJSON = busArrivalsJSON,
+                busStopDetailsJSON = busStopDetails,
+                busRoutes = busRoutes,
+                modifier = modifier
+            )
+
+            Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+        }
+
+    }
+    else {
+        // Bus Stop Code
+        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+        BusStopComposable(
+            busArrivalsJSON = busArrivalsJSON,
+            busStopDetailsJSON = busStopDetails,
+            busRoutes = busRoutes,
+            modifier = modifier
+        )
+
+        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+    }
 }
 
 

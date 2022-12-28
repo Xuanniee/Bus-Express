@@ -86,7 +86,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 
                     // 500 since according to LTA Record each API Call is confined to 500 Records
                     for (i in 1..500) {
-                        Log.d("debugTag", "This is output ${busStopRoute[iteratorIndex].serviceNo}")
+//                        Log.d("debugTag", "This is output ${busStopRoute[iteratorIndex].serviceNo}")
                         // Must compare string since Bus Services like 901M exist
                         if (busStopRoute[iteratorIndex].serviceNo == targetBusService) {
                             // Found a Bus Stop of Route, append to Result Array
@@ -110,6 +110,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                             metaData = listResult.metaData,
                             busRouteArray = targetServiceRoute
                         )
+                        // For Loop to get all the Arrival Timings for all Bus Stops in the Route
                         break
                     }
                     else {
