@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.busexpress.R
+import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.network.SingaporeBusServices
 import java.time.Duration
@@ -26,6 +27,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
+    busStopDetailsJSON: BusStopValue,
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
@@ -56,13 +58,13 @@ fun BusStopComposable(
             Column {
                 // Description of Bus Stop
                 Text(
-                    text = "Aft Punggol Road",
+                    text = busStopDetailsJSON.busStopDescription,
                     style = MaterialTheme.typography.h6
                 )
 
                 // Bus Stop Road & Code
                 Text(
-                    text = "TPE ($currentBusStopCode)",
+                    text = "${busStopDetailsJSON.busStopRoadName} ($currentBusStopCode)",
                     style = MaterialTheme.typography.body1
                 )
 
@@ -155,7 +157,6 @@ fun BusComposableExpandButton(
 fun ExpandedBusStop(
     modifier: Modifier = Modifier,
     currentBusStopService: SingaporeBusServices,
-
 ) {
     // Determine the Current Timestamp as LocalDateTime
     val currentTimestamp = LocalDateTime.now()

@@ -1,5 +1,6 @@
 package com.example.busexpress.ui.screens
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -27,6 +28,7 @@ import androidx.navigation.NavController
 import com.example.busexpress.BusExpressApp
 import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
+import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.component.BusStopComposable
 
@@ -36,7 +38,7 @@ fun DefaultScreen(
     modifier: Modifier = Modifier,
     appViewModel: AppViewModel = viewModel(),
     busArrivalsJson: SingaporeBus,
-//    navController: NavController
+    busStopDetails: BusStopValue
 ) {
     // Mutable State for User Input
     var userInput = remember {
@@ -57,19 +59,20 @@ fun DefaultScreen(
                 imeAction = ImeAction.Search
             ),
             onKeyboardSearch = {
+                // Using the ViewModel to call the 2 Functions to get Bus Stop Details & Timings
                 appViewModel.getBusTimings(userInput.value.text)
+                appViewModel.getBusStopNames(userInput.value.text.toInt())
+                Log.d("debugTag", userInput.value.text)
                 // Close the Onscreen Keyboard
-
 
             }
         )
 //        val busArrivalsJson = appViewModel.getBusTimings(userInput = userInput.value.text)
 
         when(busUiState) {
-            is BusUiState.Success -> ResultScreen(busUiState = busUiState, busArrivalsJSON = busArrivalsJson)
+            is BusUiState.Success -> ResultScreen(busStopDetails = busStopDetails, busArrivalsJSON = busArrivalsJson)
             is BusUiState.Loading -> LoadingScreen()
             is BusUiState.Error -> ErrorScreen()
-            else -> ErrorScreen()
         }
 
 
@@ -108,7 +111,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
  */
 @Composable
 fun ResultScreen(
-    busUiState: BusUiState,
+    busStopDetails: BusStopValue,
     busArrivalsJSON: SingaporeBus,
     modifier: Modifier = Modifier,
 ) {
@@ -117,15 +120,10 @@ fun ResultScreen(
     // Results of Search
     BusStopComposable(
         busArrivalsJSON = busArrivalsJSON,
+        busStopDetailsJSON = busStopDetails,
         modifier = modifier
     )
     Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
-//    Box(
-//        contentAlignment = Alignment.Center,
-//        modifier = modifier.fillMaxSize()
-//    ) {
-//        Text(busUiState.toString())
-//    }
 }
 
 

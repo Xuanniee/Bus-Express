@@ -3,6 +3,9 @@ package com.example.busexpress.network
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Bus Arrival Timings API Data Classes
+ */
 @Serializable
 data class SingaporeBus(
     @SerialName(value = "odata.metadata")
@@ -69,32 +72,34 @@ data class NextBusTiming(
     val vehicleType: String = "No Bus Service Available",
 )
 
-// Data Class for Bus Stops
+/**
+ * Bus Stop Details API Data Classes
+ */
 @Serializable
 data class BusStop(
     @SerialName(value = "odata.metadata")
     val metaData: String,
 
     // Can be Null if no Bus Stops
-    val value: List<BusStopValue?>
+    val value: List<BusStopValue> = listOf(BusStopValue())
 )
 
 @Serializable
 data class BusStopValue(
     @SerialName(value = "BusStopCode")
-    val busStopCode: String,
+    val busStopCode: String = "Bus Stop Not Found",
 
     @SerialName(value = "RoadName")
-    val busStopRoadName: String,
+    val busStopRoadName: String = "NA",
 
     @SerialName(value = "Description")
-    val busStopDescription: String,
+    val busStopDescription: String = "NA",
 
     @SerialName(value = "Latitude")
-    val latitude: Int,
+    val latitude: Double = 0.0,
 
     @SerialName(value = "Longitude")
-    val longitude: Int,
+    val longitude: Double = 0.0,
 )
 
 

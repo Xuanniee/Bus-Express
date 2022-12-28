@@ -27,7 +27,21 @@ interface BusApiService {
         "AccountKey: $LTA_API_SECRET_KEY"
     )
     @GET("BusStops")
-    suspend fun getDetailsOfBusStop(): BusStop
+    suspend fun getDetailsOfBusStop(
+        @Query("${'$'}skip") NumRecordsToSkip: Int? = null
+    ): BusStop
+
+    // 3. Returns all the Bus Routes in Singapore
+    @Headers(
+        "accept: application/json",
+        "AccountKey: $LTA_API_SECRET_KEY"
+    )
+    @GET("BusRoutes")
+    suspend fun getBusRoutes(
+
+    )
+
+
     /*
     // 2. Returns Bus Timings for Bus Service
     @Headers(

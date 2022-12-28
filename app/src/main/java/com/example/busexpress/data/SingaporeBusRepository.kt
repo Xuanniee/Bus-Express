@@ -11,7 +11,7 @@ interface SingaporeBusRepository {
     suspend fun getBusTimings(busStopCode: String?, busServiceNumber: String?): SingaporeBus
 
     // Bus Details
-    suspend fun getBusDetails(): BusStop
+    suspend fun getBusDetails(numRecordsToSkip: Int?): BusStop
 }
 
 class DefaultSingaporeBusRepository(
@@ -25,8 +25,10 @@ class DefaultSingaporeBusRepository(
         )
     }
 
-    override suspend fun getBusDetails(): BusStop {
-        return busApiService.getDetailsOfBusStop()
+    override suspend fun getBusDetails(numRecordsToSkip: Int?): BusStop {
+        return busApiService.getDetailsOfBusStop(
+            NumRecordsToSkip = numRecordsToSkip
+        )
     }
 }
 

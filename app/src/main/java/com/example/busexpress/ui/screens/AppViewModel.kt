@@ -11,8 +11,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
+import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
-import com.example.busexpress.network.SingaporeBusServices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,12 +26,21 @@ import java.io.IOException
  * pickup date. It also knows how to calculate the total price based on these order details.
  */
 class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): ViewModel() {
+    /**
+     *  StateFlows to store the Data of API Calls
+     */
     private val _busServiceUiState = MutableStateFlow(SingaporeBus())
     val busServiceUiState: StateFlow<SingaporeBus> = _busServiceUiState.asStateFlow()
+
+    private val _busStopNameUiState = MutableStateFlow(BusStopValue())
+    val busStopNameUiState: StateFlow<BusStopValue> = _busStopNameUiState.asStateFlow()
 
     /** The mutable State that stores the status of the most recent request */
     var busUiState: BusUiState by mutableStateOf(BusUiState.Loading)     // Loading as Default Value
         // Setter is private to protect writes to the busUiState
+        private set
+
+    var busNameUiState: BusStopNameUiState by mutableStateOf(BusStopNameUiState.Loading)
         private set
 
     /**
@@ -39,12 +48,78 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
      */
     init {
         getBusTimings(null)
+        getBusStopNames(0)
+    }
+
+    // TODO Make it async and await()
+    fun getBusStopNames(targetBusStopCode: Int) {
+            viewModelScope.launch {
+            busNameUiState = BusStopNameUiState.Loading
+            busNameUiState = try {
+                var targetBusStop = BusStopValue()
+                var targetBusStopFound = false
+                var skipIndex = 0
+
+                // Retrieve the Desired Bus Stop Object
+                do {
+                    val listResult = singaporeBusRepository.getBusDetails(numRecordsToSkip = skipIndex)
+                    val busStopDetails = listResult.value
+                    val forLoopSize = busStopDetails.size
+                    var indexBSD = 0
+
+//                    if (busStopDetails == null) {
+//                        // No more Bus Stops to call
+//                        Log.d("TEST", "IS NULL and SkipIndex == $skipIndex")
+//                        break
+//                    }
+
+                    // Loop through the 500 Records of this Call to see if the Bus Stop we want is inside
+                    for(i in 1..forLoopSize) {
+                        if (busStopDetails[indexBSD].busStopCode.toInt() == targetBusStopCode) {
+                            targetBusStopFound = true
+                            break
+                        }
+                        // Update to check every Record of API Call
+                        indexBSD += 1
+                    }
+
+                    // Check if the Bus Stop we want is in this API Call
+                    if (targetBusStopFound) {
+                        targetBusStop = busStopDetails[indexBSD]
+                    }
+                    else {
+                        // Call the Next 500/ or whatever size pulled Records
+                        skipIndex += forLoopSize
+                    }
+                } while(!targetBusStopFound)
+
+                // After finding the Correct Bus Stop
+                if (targetBusStop.busStopCode != "Bus Stop Not Found") {
+                    _busStopNameUiState.value = BusStopValue(
+                                                    busStopCode = targetBusStop.busStopCode,
+                                                    busStopRoadName = targetBusStop.busStopRoadName,
+                                                    busStopDescription = targetBusStop.busStopDescription,
+                                                    latitude = targetBusStop.latitude,
+                                                    longitude = targetBusStop.longitude
+                                                )
+
+                }
+
+                BusStopNameUiState.Success(targetBusStop.busStopRoadName)
+            }
+            catch (e: IOException) {
+                BusStopNameUiState.Error
+            }
+            catch (e: HttpException) {
+                BusStopNameUiState.Error
+            }
+        }
     }
 
     fun getBusTimings(userInput: String?) {
         // Determine if UserInput is a BusStopCode
-        var busStopCode: String?
-        var busServiceNumber: String?
+        val busStopCode: String?
+        val busServiceNumber: String?
         val userInputLength = userInput?.length ?: 0
         if (userInputLength == 5) {
             // Bus Stop Code
@@ -64,7 +139,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
             // Might have Connectivity Issues
             busUiState = try {
                 // Within this Scope, use the Repository, not the Object to access the Data, abstracting the data within the Data Layer
-                var listResult = singaporeBusRepository.getBusTimings(
+                val listResult = singaporeBusRepository.getBusTimings(
                     busServiceNumber = busServiceNumber,
                     busStopCode = busStopCode
                 )
@@ -107,6 +182,12 @@ sealed interface BusUiState {
     object Error: BusUiState
     object Loading: BusUiState
     // Sealed Interface used instead of Interface to remove Else Branch
+}
+
+sealed interface BusStopNameUiState {
+    data class Success(val busStopName: String): BusStopNameUiState
+    object Error: BusStopNameUiState
+    object Loading: BusStopNameUiState
 }
 
 

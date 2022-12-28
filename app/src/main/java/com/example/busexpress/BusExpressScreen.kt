@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
@@ -238,7 +239,10 @@ fun BusExpressApp(
             )
         }
     ) { innerPadding ->
+        // Holding the API Call Data here is better so I can pass it to multiple screens
         val busServiceUiState by viewModel.busServiceUiState.collectAsState()
+        val busStopNameUiState by viewModel.busStopNameUiState.collectAsState()
+
 
         // NavHost Composable for Navigating between Screens
         NavHost(
@@ -256,6 +260,13 @@ fun BusExpressApp(
                         metaData = busServiceUiState.metaData,
                         busStopCode = busServiceUiState.busStopCode,
                         services = busServiceUiState.services
+                    ),
+                    busStopDetails = BusStopValue(
+                        busStopCode = busStopNameUiState.busStopCode,
+                        busStopRoadName = busStopNameUiState.busStopRoadName,
+                        busStopDescription = busStopNameUiState.busStopDescription,
+                        latitude = busStopNameUiState.latitude,
+                        longitude = busStopNameUiState.longitude
                     ),
                     appViewModel = viewModel
                 )

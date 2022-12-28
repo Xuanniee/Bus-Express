@@ -10,3 +10,16 @@ fun FavouritesGoingOutScreen(
 ) {
     Text(text = "Favourites")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
