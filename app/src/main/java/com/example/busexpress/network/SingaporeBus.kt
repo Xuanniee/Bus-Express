@@ -80,7 +80,7 @@ data class BusStop(
     @SerialName(value = "odata.metadata")
     val metaData: String,
 
-    // Can be Null if no Bus Stops
+    // No Bus Stops should be an Empty List and not Null
     val value: List<BusStopValue> = listOf(BusStopValue())
 )
 
@@ -102,8 +102,91 @@ data class BusStopValue(
     val longitude: Double = 0.0,
 )
 
+/**
+ *  API Call to get all Bus Routes in Singapore
+ */
 
+@Serializable
+data class BusRoutes(
+    @SerialName(value = "odata.metadata")
+    val metaData: String = "http://datamall2.mytransport.sg/ltaodataservice/${'$'}metadataBusRoutes",
 
+    @SerialName(value = "value")
+    val busRouteArray: List<BusStopInRoute> = listOf(BusStopInRoute())
+)
 
+@Serializable
+data class BusStopInRoute(
+    @SerialName(value = "ServiceNo")
+    val serviceNo: String = "Bus Service not found!!",
 
+    @SerialName(value = "Operator")
+    val busOperator: String = "NA",
 
+    // Either 1 or 2 Directions only
+    @SerialName(value = "Direction")
+    val routeDirection: Int = 1,
+
+    @SerialName(value = "StopSequence")
+    val stopSequence: Int = 1,
+
+    @SerialName(value = "BusStopCode")
+    val busStopCode: String = "NA",
+
+    @SerialName(value = "Distance")
+    val distanceTravelled: Double = 0.0,
+
+    @SerialName(value = "WD_FirstBus")
+    val weekdayFirstBusTime: String = "NA",
+
+    @SerialName(value = "WD_LastBus")
+    val weekdayLastBusTime: String = "NA",
+
+    @SerialName(value = "SAT_FirstBus")
+    val saturdayFirstBusTime: String = "NA",
+
+    @SerialName(value = "SAT_LastBus")
+    val saturdayLastBusTime: String = "NA",
+
+    @SerialName(value = "SUN_FirstBus")
+    val sundayFirstBusTime: String = "NA",
+
+    @SerialName(value = "SUN_LastBus")
+    val sundayLastBusTime: String = "NA",
+)
+
+/**
+ * Data Class to hold result of parsed User Input
+ */
+data class userInputResult(
+    val busStopCodeBool: Boolean,
+    val busServiceBool: Boolean,
+    val busStopCode: String?,
+    val busServiceNo: String?
+)
+
+/**
+ * Data Class to Hold Bus Arrival Features
+ */
+data class BusOccupancyResults(
+    val nextBusOccupancyArray: Array<Int>,
+    val nextBusOccupancyDescArray: Array<Int>
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BusOccupancyResults
+
+        if (!nextBusOccupancyArray.contentEquals(other.nextBusOccupancyArray)) return false
+        if (!nextBusOccupancyDescArray.contentEquals(other.nextBusOccupancyDescArray)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = nextBusOccupancyArray.contentHashCode()
+        result = 31 * result + nextBusOccupancyDescArray.contentHashCode()
+        return result
+    }
+}

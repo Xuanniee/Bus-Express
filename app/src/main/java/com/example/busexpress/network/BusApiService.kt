@@ -38,8 +38,8 @@ interface BusApiService {
     )
     @GET("BusRoutes")
     suspend fun getBusRoutes(
-
-    )
+        @Query("${'$'}skip") NumRecordsToSkip: Int? = null
+    ): BusRoutes
 
 
     /*

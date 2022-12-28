@@ -21,8 +21,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.busexpress.network.BusRoutes
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
+import com.example.busexpress.network.userInputResult
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
 import com.example.busexpress.ui.theme.NavigationDrawer
@@ -242,6 +244,10 @@ fun BusExpressApp(
         // Holding the API Call Data here is better so I can pass it to multiple screens
         val busServiceUiState by viewModel.busServiceUiState.collectAsState()
         val busStopNameUiState by viewModel.busStopNameUiState.collectAsState()
+        val busRouteUiState by viewModel.busRouteUiState.collectAsState()
+
+        // State Variables
+        val busServiceBoolUiState = viewModel.busServiceBoolUiState
 
 
         // NavHost Composable for Navigating between Screens
@@ -268,6 +274,11 @@ fun BusExpressApp(
                         latitude = busStopNameUiState.latitude,
                         longitude = busStopNameUiState.longitude
                     ),
+                    busRoutes = BusRoutes(
+                        metaData = busRouteUiState.metaData,
+                        busRouteArray = busRouteUiState.busRouteArray
+                    ),
+                    busServiceBool = busServiceBoolUiState,
                     appViewModel = viewModel
                 )
             }
@@ -301,5 +312,33 @@ fun BusExpressApp(
 }
 
 // Helper Functions
+/**
+ *  Determine the type of User Input
+ */
+fun determineBusServiceorStop(userInput: String?): userInputResult {
+    // Determine if UserInput is a BusStopCode
+    var busStopCode: String?
+    var busServiceNumber: String?
+    var busStopCodeBool = false
+    val userInputLength = userInput?.length
 
+    if (userInputLength == 5) {
+        // Bus Stop Code
+        busStopCode = userInput
+        busServiceNumber = null
+        busStopCodeBool = true
+    }
+    else {
+        // Bus Service Number
+        busStopCode = null
+        busServiceNumber = userInput
+    }
+
+    return userInputResult(
+        busServiceBool = !busStopCodeBool,
+        busStopCodeBool = busStopCodeBool,
+        busStopCode = busStopCode,
+        busServiceNo = busServiceNumber
+    )
+}
 

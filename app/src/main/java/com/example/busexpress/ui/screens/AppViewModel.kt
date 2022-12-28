@@ -1,5 +1,6 @@
 package com.example.busexpress.ui.screens
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
+import com.example.busexpress.determineBusServiceorStop
+import com.example.busexpress.network.BusRoutes
+import com.example.busexpress.network.BusStopInRoute
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,12 +39,22 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     private val _busStopNameUiState = MutableStateFlow(BusStopValue())
     val busStopNameUiState: StateFlow<BusStopValue> = _busStopNameUiState.asStateFlow()
 
+    private val _busRouteUiState = MutableStateFlow(BusRoutes())
+    val busRouteUiState: StateFlow<BusRoutes> = _busRouteUiState.asStateFlow()
+
     /** The mutable State that stores the status of the most recent request */
     var busUiState: BusUiState by mutableStateOf(BusUiState.Loading)     // Loading as Default Value
         // Setter is private to protect writes to the busUiState
         private set
 
     var busNameUiState: BusStopNameUiState by mutableStateOf(BusStopNameUiState.Loading)
+        private set
+
+    var busRoutingUiState: BusRouteUiState by mutableStateOf(BusRouteUiState.Loading)
+        private set
+
+    // Boolean to determine if we should show Bus Stops or Routes
+    var busServiceBoolUiState: Boolean by mutableStateOf(false)
         private set
 
     /**
@@ -51,8 +65,73 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         getBusStopNames(0)
     }
 
+    fun getBusRoutes(targetBusService: String?) {
+        busServiceBoolUiState = true
+        viewModelScope.launch {
+            busRoutingUiState = BusRouteUiState.Loading
+            busRoutingUiState = try {
+                // Goal: To get the Route, i.e. all the Bus Stop Codes for a SINGLE Bus Service
+                var skipIndex = 0
+                var targetServiceRoute = mutableListOf<BusStopInRoute>()
+                var targetRouteFound = false
+
+                do {
+                    // Variables to hold Conditions
+                    var iteratorIndex = 0
+                    var completedRoute = false
+
+                    // API Call
+                    val listResult = singaporeBusRepository.getBusRoutes(skipIndex)
+                    val busStopRoute = listResult.busRouteArray
+
+                    // 500 since according to LTA Record each API Call is confined to 500 Records
+                    for (i in 1..500) {
+                        Log.d("debugTag", "This is output ${busStopRoute[iteratorIndex].serviceNo}")
+                        // Must compare string since Bus Services like 901M exist
+                        if (busStopRoute[iteratorIndex].serviceNo == targetBusService) {
+                            // Found a Bus Stop of Route, append to Result Array
+                            targetServiceRoute.add(busStopRoute[i])
+                            if (busStopRoute[iteratorIndex].stopSequence != 1) {
+                                targetRouteFound = true
+                            }
+                        }
+                        // Condition to Check if Route is Complete
+                        else if (targetRouteFound && (busStopRoute[iteratorIndex].stopSequence == 1)) {
+                            // Passed the Target Route alr
+                            completedRoute = true
+                            break
+                        }
+                        iteratorIndex += 1
+                    }
+
+                    // Stopping Condition
+                    if (completedRoute) {
+                        _busRouteUiState.value = BusRoutes(
+                            metaData = listResult.metaData,
+                            busRouteArray = targetServiceRoute
+                        )
+                        break
+                    }
+                    else {
+                        skipIndex += 500
+                    }
+                } while(true)
+
+                BusRouteUiState.Success(targetServiceRoute)
+            }
+            catch (e: IOException) {
+                BusRouteUiState.Error
+            }
+            catch (e: HttpException) {
+                BusRouteUiState.Error
+            }
+
+        }
+    }
+
     // TODO Make it async and await()
     fun getBusStopNames(targetBusStopCode: Int) {
+            busServiceBoolUiState = false
             viewModelScope.launch {
             busNameUiState = BusStopNameUiState.Loading
             busNameUiState = try {
@@ -66,12 +145,6 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                     val busStopDetails = listResult.value
                     val forLoopSize = busStopDetails.size
                     var indexBSD = 0
-
-//                    if (busStopDetails == null) {
-//                        // No more Bus Stops to call
-//                        Log.d("TEST", "IS NULL and SkipIndex == $skipIndex")
-//                        break
-//                    }
 
                     // Loop through the 500 Records of this Call to see if the Bus Stop we want is inside
                     for(i in 1..forLoopSize) {
@@ -118,19 +191,9 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 
     fun getBusTimings(userInput: String?) {
         // Determine if UserInput is a BusStopCode
-        val busStopCode: String?
-        val busServiceNumber: String?
-        val userInputLength = userInput?.length ?: 0
-        if (userInputLength == 5) {
-            // Bus Stop Code
-            busStopCode = userInput
-            busServiceNumber = null
-        }
-        else {
-            // Bus Service Number
-            busStopCode = null
-            busServiceNumber = userInput
-        }
+        val userInputResult = determineBusServiceorStop(userInput = userInput)
+        val busStopCode = userInputResult.busStopCode
+        val busServiceNumber = userInputResult.busServiceNo
 
         //var listResult: SingaporeBus = SingaporeBus(metaData = "Initialised", busStopCode = "Initialised")
         // Launch the Coroutine using a ViewModelScope
@@ -190,5 +253,9 @@ sealed interface BusStopNameUiState {
     object Loading: BusStopNameUiState
 }
 
-
+sealed interface BusRouteUiState {
+    data class Success(val busRoutes: MutableList<BusStopInRoute>): BusRouteUiState
+    object Error: BusRouteUiState
+    object Loading: BusRouteUiState
+}
 

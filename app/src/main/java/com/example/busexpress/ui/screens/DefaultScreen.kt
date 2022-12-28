@@ -28,6 +28,8 @@ import androidx.navigation.NavController
 import com.example.busexpress.BusExpressApp
 import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
+import com.example.busexpress.determineBusServiceorStop
+import com.example.busexpress.network.BusRoutes
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.component.BusStopComposable
@@ -38,6 +40,8 @@ fun DefaultScreen(
     modifier: Modifier = Modifier,
     appViewModel: AppViewModel = viewModel(),
     busArrivalsJson: SingaporeBus,
+    busRoutes: BusRoutes,
+    busServiceBool: Boolean,
     busStopDetails: BusStopValue
 ) {
     // Mutable State for User Input
@@ -59,20 +63,45 @@ fun DefaultScreen(
                 imeAction = ImeAction.Search
             ),
             onKeyboardSearch = {
+                // TODO Create a Helper Function to determine if User keyed in a Bus Service Number or Bus Stop Code
+                val userInputResult = determineBusServiceorStop(userInput = userInput.value.text)
+
                 // Using the ViewModel to call the 2 Functions to get Bus Stop Details & Timings
-                appViewModel.getBusTimings(userInput.value.text)
                 appViewModel.getBusStopNames(userInput.value.text.toInt())
-                Log.d("debugTag", userInput.value.text)
+
+                if (userInputResult.busStopCodeBool) {
+                    // User provided Bus Stop Code
+                    appViewModel.getBusTimings(userInput.value.text)
+                }
+                else {
+                    // User provided Bus Service Number
+                    appViewModel.getBusRoutes(targetBusService = userInputResult.busServiceNo)
+                    val busRoutesArray = busRoutes.busRouteArray
+                    for (busStop in busRoutesArray) {
+                        appViewModel.getBusTimings(userInput = busStop.busStopCode)
+                    }
+                }
                 // Close the Onscreen Keyboard
 
             }
         )
-//        val busArrivalsJson = appViewModel.getBusTimings(userInput = userInput.value.text)
 
         when(busUiState) {
-            is BusUiState.Success -> ResultScreen(busStopDetails = busStopDetails, busArrivalsJSON = busArrivalsJson)
-            is BusUiState.Loading -> LoadingScreen()
-            is BusUiState.Error -> ErrorScreen()
+            is BusUiState.Success -> {
+                ResultScreen(
+                    busStopDetails = busStopDetails,
+                    busArrivalsJSON = busArrivalsJson,
+                    busRoutes = busRoutes,
+                    busServiceBool = busServiceBool,
+                    appViewModel = appViewModel
+                )
+            }
+            is BusUiState.Loading -> {
+                LoadingScreen()
+            }
+            is BusUiState.Error -> {
+                ErrorScreen()
+            }
         }
 
 
@@ -113,6 +142,9 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 fun ResultScreen(
     busStopDetails: BusStopValue,
     busArrivalsJSON: SingaporeBus,
+    busRoutes: BusRoutes,
+    busServiceBool: Boolean,
+    appViewModel: AppViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
 
@@ -121,6 +153,9 @@ fun ResultScreen(
     BusStopComposable(
         busArrivalsJSON = busArrivalsJSON,
         busStopDetailsJSON = busStopDetails,
+        busRoutes = busRoutes,
+        busServiceBool =  busServiceBool,
+        appViewModel = appViewModel,
         modifier = modifier
     )
     Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))

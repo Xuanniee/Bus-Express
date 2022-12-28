@@ -2,6 +2,7 @@ package com.example.busexpress.data
 
 
 import com.example.busexpress.network.BusApiService
+import com.example.busexpress.network.BusRoutes
 import com.example.busexpress.network.BusStop
 import com.example.busexpress.network.SingaporeBus
 
@@ -12,6 +13,9 @@ interface SingaporeBusRepository {
 
     // Bus Details
     suspend fun getBusDetails(numRecordsToSkip: Int?): BusStop
+
+    // Bus Routes
+    suspend fun getBusRoutes(numRecordsToSkip: Int?): BusRoutes
 }
 
 class DefaultSingaporeBusRepository(
@@ -27,6 +31,12 @@ class DefaultSingaporeBusRepository(
 
     override suspend fun getBusDetails(numRecordsToSkip: Int?): BusStop {
         return busApiService.getDetailsOfBusStop(
+            NumRecordsToSkip = numRecordsToSkip
+        )
+    }
+
+    override suspend fun getBusRoutes(numRecordsToSkip: Int?): BusRoutes {
+        return busApiService.getBusRoutes(
             NumRecordsToSkip = numRecordsToSkip
         )
     }

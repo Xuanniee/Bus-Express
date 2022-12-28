@@ -15,10 +15,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.busexpress.R
-import com.example.busexpress.network.BusStopValue
-import com.example.busexpress.network.SingaporeBus
-import com.example.busexpress.network.SingaporeBusServices
+import com.example.busexpress.determineBusServiceorStop
+import com.example.busexpress.network.*
+import com.example.busexpress.ui.screens.AppViewModel
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -28,15 +29,17 @@ import java.time.format.DateTimeFormatter
 fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
     busStopDetailsJSON: BusStopValue,
+    busRoutes: BusRoutes,
+    busServiceBool: Boolean,
+    appViewModel: AppViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
     val currentBusStopCode: String = busArrivalsJSON.busStopCode
     val currentBusStopServices: List<SingaporeBusServices> = busArrivalsJSON.services
 
-    // Bus Stop Details
-//    val currentBusStop = busStopsJSON
-  //  val currentBusStopDetails: List<BusStopValue?> = currentBusStop.value
+    // Bus Route Details
+    val busRouteArray: List<BusStopInRoute> = busRoutes.busRouteArray
 
     // Store the Variable State if Bus is Expanded
     var expanded by remember { mutableStateOf(false) }
@@ -97,15 +100,51 @@ fun BusStopComposable(
                     .fillMaxWidth()
                     .padding(all = 10.dp)
             ) {
-                items(currentBusStopServices) { currentBusStopService ->
-                    ExpandedBusStop(currentBusStopService = currentBusStopService, modifier = Modifier.padding(3.dp))
+                // Shows Arrival Timing when User provides Bus Stop Code
+                if (!busServiceBool) {
+                    items(currentBusStopServices) { currentBusStopService ->
+                        ExpandedBusStop(
+                            currentBusStopService = currentBusStopService,
+                            modifier = Modifier.padding(3.dp)
+                        )
+                    }
+                }
+                // Arrival Timing for Bus Service Numbers
+                else {
+                    items(busRouteArray) { currentBusStopInRoute ->
+                        ExpandedBusServices(currentBusStop = currentBusStopInRoute)
+                    }
                 }
             }
 
         }
     }
+}
+
+@Composable
+fun ExpandedBusServices(
+    currentBusStop: BusStopInRoute,
+    appViewModel: AppViewModel = viewModel(),
+    modifier: Modifier = Modifier
+) {
+    // Get Current Bus Stop Code and Use it to get the Timings of all the Buses Available at the Bus Stop
+    val currentBusStopCode = currentBusStop.busStopCode
+    appViewModel.getBusTimings(currentBusStopCode)
 
 
+    // Array holding the Next 3 Bus Objects
+    val nextBusArray = arrayListOf(
+        currentBusStopService.nextBus1,
+        currentBusStopService.nextBus2,
+        currentBusStopService.nextBus3
+    )
+
+    val nextBusEtaArray = determineTimeArrival(nextBusArray = nextBusArray)
+    val nextBusOccupancyArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyArray
+    val nextBusOccupancyDescArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyDescArray
+    val nextBusWheelchairArray = determineWheelchairAccessibility(nextBusArray = nextBusArray)
+    val nextBusTypeArray = determineTypeBus(nextBusArray = nextBusArray)
+    val currentBusService = currentBusStop.serviceNo
 
 }
 
@@ -158,15 +197,6 @@ fun ExpandedBusStop(
     modifier: Modifier = Modifier,
     currentBusStopService: SingaporeBusServices,
 ) {
-    // Determine the Current Timestamp as LocalDateTime
-    val currentTimestamp = LocalDateTime.now()
-    val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
-    val nextBusEtaArray = Array(3) { "" }
-    val nextBusOccupancyArray = Array(3) { 0 }
-    val nextBusOccupancyDescArray = Array(3) { 0 }
-    val nextBusWheelchairArray = Array(3) { 0 }
-    val nextBusTypeArray = Array(3) { 0 }
-
     // Array holding the Next 3 Bus Objects
     val nextBusArray = arrayListOf(
         currentBusStopService.nextBus1,
@@ -174,83 +204,12 @@ fun ExpandedBusStop(
         currentBusStopService.nextBus3
     )
 
+    val nextBusEtaArray = determineTimeArrival(nextBusArray = nextBusArray)
+    val nextBusOccupancyArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyArray
+    val nextBusOccupancyDescArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyDescArray
+    val nextBusWheelchairArray = determineWheelchairAccessibility(nextBusArray = nextBusArray)
+    val nextBusTypeArray = determineTypeBus(nextBusArray = nextBusArray)
     val currentBusService = currentBusStopService.busServiceNumber
-
-    // For Loop for the Next 3 Buses
-    for (i: Int in 0..2) {
-        // Determining the ETA of the Next 3 Buses in Minutes
-        val nextBus = nextBusArray[i]
-        val nextBusTimestampString = nextBus.estimatedArrival  // In the Event there are no longer any buses
-
-        // Check if Bus Services are still available
-        if (nextBusTimestampString == "") {
-            // Unavailable Bus Service
-            nextBusEtaArray[i] = "NA"
-        }
-        else {
-            // Round down to Nearest Minute and Convert into a String
-            val nextBusTimestamp = LocalDateTime.parse(nextBusTimestampString, datetimeFormatter)
-            val nextBusETA = Duration.between(currentTimestamp, nextBusTimestamp).toMinutes()
-            // If less than a minute, change to Arriving
-            if (nextBusETA < 1) {
-                nextBusEtaArray[i] = "Arr"
-            }
-            else {
-                nextBusEtaArray[i] = nextBusETA.toString()
-            }
-
-        }
-
-        // Determining the Occupancy Rates of the Next 3 Buses
-        when (nextBus.busOccupancyLevels) {
-            "SEA" -> {
-                nextBusOccupancyArray[i] = R.drawable.seats_available_img
-                nextBusOccupancyDescArray[i] = R.string.seats_avail_content_desc
-            }
-            "SDA" -> {
-                nextBusOccupancyArray[i] = R.drawable.standing_available_img
-                nextBusOccupancyDescArray[i] = R.string.standing_avail_content_desc
-            }
-            "LSD" -> {
-                nextBusOccupancyArray[i] = R.drawable.limited_standing_img
-                nextBusOccupancyDescArray[i] = R.string.limited_standing_content_desc
-            }
-            // No Bus Services
-            else -> {
-                nextBusOccupancyArray[i] = 0
-                nextBusOccupancyDescArray[i] = 0
-            }
-        }
-
-        // Determine Type of Bus
-        when (nextBus.vehicleType) {
-            "SD" -> {
-                nextBusTypeArray[i] = R.string.single_deck_bus_type
-            }
-            "DD" -> {
-                nextBusTypeArray[i] = R.string.double_deck_bus_type
-            }
-            "BD" -> {
-                nextBusTypeArray[i] = R.string.bendy_bus_type
-            }
-            // No Bus Service incoming
-            else -> {
-                nextBusTypeArray[i] = 0
-            }
-        }
-
-        // Determining if Wheelchair Accessible
-        val nextBusWheelchair = nextBus.wheelchairAccessible
-        if (nextBusWheelchair == "WAB") {
-            // Supports Wheelchair
-            nextBusWheelchairArray[i] = R.drawable.wheelchair_accessible_bus
-        }
-        else {
-            nextBusWheelchairArray[i] = 0
-        }
-
-    }
-
 
     Divider(
         thickness = 2.dp,
@@ -419,6 +378,132 @@ fun ExpandedBusStop(
     )
 }
 
+/**
+ * Helper Function to help determine various features of Bus Arrivals provided by LTA Datamall API
+ */
+// Determine Time Arriving for Buses
+fun determineTimeArrival(
+    nextBusArray: List<NextBusTiming>
+): Array<String> {
+    // Determine the Current Timestamp as LocalDateTime
+    val currentTimestamp = LocalDateTime.now()
+    val datetimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
+    val nextBusEtaArray = Array(3) { "" }
 
+    // For Loop for the Next 3 Buses
+    for (i: Int in 0..2) {
+        // Determining the ETA of the Next 3 Buses in Minutes
+        val nextBus = nextBusArray[i]
+        val nextBusTimestampString = nextBus.estimatedArrival  // In the Event there are no longer any buses
+
+        // Check if Bus Services are still available
+        if (nextBusTimestampString == "") {
+            // Unavailable Bus Service
+            nextBusEtaArray[i] = "NA"
+        }
+        else {
+            // Round down to Nearest Minute and Convert into a String
+            val nextBusTimestamp = LocalDateTime.parse(nextBusTimestampString, datetimeFormatter)
+            val nextBusETA = Duration.between(currentTimestamp, nextBusTimestamp).toMinutes()
+            // If less than a minute, change to Arriving
+            if (nextBusETA < 1) {
+                nextBusEtaArray[i] = "Arr"
+            }
+            else {
+                nextBusEtaArray[i] = nextBusETA.toString()
+            }
+        }
+    }
+    return nextBusEtaArray
+}
+
+// Determine Occupancy Rate of Buses
+fun determineOccupancyBus(
+    nextBusArray: List<NextBusTiming>
+): BusOccupancyResults {
+    val nextBusOccupancyArray = Array(3) { 0 }
+    val nextBusOccupancyDescArray = Array(3) { 0 }
+
+    // For Loop for the Next 3 Buses
+    for (i: Int in 0..2) {
+        // Determining the ETA of the Next 3 Buses in Minutes
+        val nextBus = nextBusArray[i]
+        // Determining the Occupancy Rates of the Next 3 Buses
+        when (nextBus.busOccupancyLevels) {
+            "SEA" -> {
+                nextBusOccupancyArray[i] = R.drawable.seats_available_img
+                nextBusOccupancyDescArray[i] = R.string.seats_avail_content_desc
+            }
+            "SDA" -> {
+                nextBusOccupancyArray[i] = R.drawable.standing_available_img
+                nextBusOccupancyDescArray[i] = R.string.standing_avail_content_desc
+            }
+            "LSD" -> {
+                nextBusOccupancyArray[i] = R.drawable.limited_standing_img
+                nextBusOccupancyDescArray[i] = R.string.limited_standing_content_desc
+            }
+            // No Bus Services
+            else -> {
+                nextBusOccupancyArray[i] = 0
+                nextBusOccupancyDescArray[i] = 0
+            }
+        }
+    }
+
+    return BusOccupancyResults(nextBusOccupancyArray = nextBusOccupancyArray, nextBusOccupancyDescArray = nextBusOccupancyDescArray)
+}
+
+// Determine Type of Bus
+fun determineTypeBus(
+    nextBusArray: List<NextBusTiming>
+): Array<Int> {
+    val nextBusTypeArray = Array(3) { 0 }
+
+    // For Loop for the Next 3 Buses
+    for (i: Int in 0..2) {
+        // Determining the ETA of the Next 3 Buses in Minutes
+        val nextBus = nextBusArray[i]
+
+        when (nextBus.vehicleType) {
+            "SD" -> {
+                nextBusTypeArray[i] = R.string.single_deck_bus_type
+            }
+            "DD" -> {
+                nextBusTypeArray[i] = R.string.double_deck_bus_type
+            }
+            "BD" -> {
+                nextBusTypeArray[i] = R.string.bendy_bus_type
+            }
+            // No Bus Service incoming
+            else -> {
+                nextBusTypeArray[i] = 0
+            }
+        }
+    }
+    return nextBusTypeArray
+}
+
+// Determine Wheelchair Accessibility
+fun determineWheelchairAccessibility(
+    nextBusArray: List<NextBusTiming>
+): Array<Int> {
+    val nextBusWheelchairArray = Array(3) { 0 }
+
+    for (i: Int in 0..2) {
+        // Determining the ETA of the Next 3 Buses in Minutes
+        val nextBus = nextBusArray[i]
+
+        // Determining if Wheelchair Accessible
+        val nextBusWheelchair = nextBus.wheelchairAccessible
+        if (nextBusWheelchair == "WAB") {
+            // Supports Wheelchair
+            nextBusWheelchairArray[i] = R.drawable.wheelchair_accessible_bus
+        }
+        else {
+            nextBusWheelchairArray[i] = 0
+        }
+    }
+    return nextBusWheelchairArray
+}
 
 
