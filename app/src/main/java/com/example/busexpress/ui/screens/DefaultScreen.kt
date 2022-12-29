@@ -1,5 +1,6 @@
 package com.example.busexpress.ui.screens
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,7 @@ import com.example.busexpress.network.BusServicesRoute
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.component.BusStopComposable
+import kotlinx.coroutines.delay
 
 @Composable
 fun DefaultScreen(
@@ -61,6 +63,7 @@ fun DefaultScreen(
             ),
             onKeyboardSearch = {
                 viewModel.determineUserQuery(userInput = userInput.value.text)
+
                 // Close the Onscreen Keyboard
 
             }
@@ -127,10 +130,14 @@ fun ResultScreen(
     busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier,
 ) {
+    Log.d("debugTag1", "${busServiceBool}")
     // Results of Search
     if (busServiceBool) {
         // Bus Services
         val busRouteArray = busRoutes.busRouteArray
+        Log.d("debugTag1", "${busServicesRouteList.busArrivalsJSONList}")
+        Log.d("debugTag1", "${busServicesRouteList.busStopDetailsJSONList}")
+        Log.d("debugTag1", "${busServicesRouteList.busRoutesList}")
 
         LazyColumn(
             modifier = modifier
@@ -147,6 +154,7 @@ fun ResultScreen(
                         metaData = busServicesRouteList.busArrivalsJSONList[0].metaData,
                         busRouteArray = busServicesRouteList.busRoutesList
                     ),
+                    busServiceBool = busServiceBool,
                     modifier = modifier
                 )
 
@@ -163,7 +171,8 @@ fun ResultScreen(
             busArrivalsJSON = busArrivalsJSON,
             busStopDetailsJSON = busStopDetails,
             busRoutes = busRoutes,
-            modifier = modifier
+            modifier = modifier,
+            busServiceBool = busServiceBool
         )
 
         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))

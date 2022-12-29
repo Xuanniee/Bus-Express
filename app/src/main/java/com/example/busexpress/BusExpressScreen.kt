@@ -1,5 +1,6 @@
 package com.example.busexpress
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -246,10 +247,11 @@ fun BusExpressApp(
         val busStopNameUiState by viewModel.busStopNameUiState.collectAsState()
         val busRouteUiState by viewModel.busRouteUiState.collectAsState()
         val multipleBusUiState by viewModel.multipleBusUiState.collectAsState()
+        val multipleBusStopNameUiState by viewModel.multipleBusStopNameUiState.collectAsState()
 
         // State Variables
         val busServiceBoolUiState = viewModel.busServiceBoolUiState
-
+        Log.d("debug1", "$busServiceBoolUiState")
 
         // NavHost Composable for Navigating between Screens
         NavHost(

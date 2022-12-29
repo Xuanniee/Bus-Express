@@ -32,8 +32,7 @@ fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
     busStopDetailsJSON: BusStopValue,
     busRoutes: BusRoutes,
-//    busServiceBool: Boolean,
-//    appViewModel: AppViewModel = viewModel(),
+    busServiceBool: Boolean,
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
@@ -97,20 +96,36 @@ fun BusStopComposable(
 
         // Expanded Bus Services
         if (expanded) {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(all = 10.dp)
-            ) {
-                // Shows Arrival Timing when User provides Bus Stop Code
-                items(currentBusStopServices) { currentBusStopService ->
-                    ExpandedBusStop(
-                        currentBusStopService = currentBusStopService,
-                        modifier = Modifier.padding(3.dp)
-                    )
+            if (busServiceBool) {
+                // All Bus Stops in Route
+                val currentBusStopServicesLength = currentBusStopServices.size - 1
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(all = 10.dp)
+                ) {
+                    for (index in 0..currentBusStopServicesLength) {
+                        ExpandedBusStop(currentBusStopService = currentBusStopServices[index], modifier = Modifier.padding(3.dp))
+                    }
+
                 }
             }
-
+            else {
+                // Only 1 Bus Stop
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(all = 10.dp)
+                ) {
+                    // Shows Arrival Timing when User provides Bus Stop Code
+                    items(currentBusStopServices) { currentBusStopService ->
+                        ExpandedBusStop(
+                            currentBusStopService = currentBusStopService,
+                            modifier = Modifier.padding(3.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

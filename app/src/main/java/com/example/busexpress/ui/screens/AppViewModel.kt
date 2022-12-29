@@ -1,7 +1,6 @@
 package com.example.busexpress.ui.screens
 
 import android.util.Log
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,13 +14,10 @@ import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
 import com.example.busexpress.determineBusServiceorStop
 import com.example.busexpress.network.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -46,6 +42,9 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     private val _multipleBusUiState = MutableStateFlow(BusServicesRoute())
     val multipleBusUiState: StateFlow<BusServicesRoute> = _multipleBusUiState.asStateFlow()
 
+    private val _multipleBusStopNameUiState = MutableStateFlow(BusStopValue())
+    val multipleBusStopNameUiState: StateFlow<BusStopValue> = _multipleBusStopNameUiState.asStateFlow()
+
     /** The mutable State that stores the status of the most recent request */
     var busUiState: BusUiState by mutableStateOf(BusUiState.Loading)     // Loading as Default Value
         // Setter is private to protect writes to the busUiState
@@ -59,7 +58,6 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 
     // Boolean to determine if we should show Bus Stops or Routes
     var busServiceBoolUiState: Boolean by mutableStateOf(false)
-        private set
 
     /**
      * Call init so we can display status immediately.
@@ -76,33 +74,27 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         val userInputResult = determineBusServiceorStop(userInput)
         viewModelScope.launch {
             if (userInputResult.busServiceBool) {
-                coroutineScope {
-                    // Provided Bus Service, Need get Route first
-                    getBusRoutes(targetBusService = userInputResult.busServiceNo)
-                }
+                busServiceBoolUiState = true
+                // Provided Bus Service, Need get Route first
+                getBusRoutes(targetBusService = userInputResult.busServiceNo)
                 delay(2000)
+                getMultipleBusTimings(busRoutes = _busRouteUiState.value.busRouteArray)
                 // Get the Bus Timing for Each Route
                 Log.d("debug2", "String ${_busRouteUiState.value.busRouteArray}")
-                getMultipleBusTimings(busRoutes = _busRouteUiState.value.busRouteArray)
             }
             else {
                 // Provided Bus Stop Code
                 coroutineScope {
                     launch {
                         getBusStopNames(targetBusStopCode = userInputResult.busStopCode?.toInt())
-                    }
-                    launch {
                         getBusTimings(userInput = userInputResult.busStopCode)
                     }
                 }
             }
-
-
         }
     }
 
-    private suspend fun getBusRoutes(targetBusService: String?) {
-        busServiceBoolUiState = true
+    private fun getBusRoutes(targetBusService: String?) {
         viewModelScope.launch {
             busRoutingUiState = BusRouteUiState.Loading
             busRoutingUiState = try {
@@ -173,8 +165,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     }
 
     // TODO Make it async and await()
-    private suspend fun getBusStopNames(targetBusStopCode: Int?) {
-            busServiceBoolUiState = false
+    private fun getBusStopNames(targetBusStopCode: Int?, multipleBusBool: Boolean = false) {
             viewModelScope.launch {
             busNameUiState = BusStopNameUiState.Loading
             busNameUiState = try {
@@ -213,14 +204,24 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 
                 // After finding the Correct Bus Stop
                 if (targetBusStop.busStopCode != "Bus Stop Not Found") {
-                    _busStopNameUiState.value = BusStopValue(
-                                                    busStopCode = targetBusStop.busStopCode,
-                                                    busStopRoadName = targetBusStop.busStopRoadName,
-                                                    busStopDescription = targetBusStop.busStopDescription,
-                                                    latitude = targetBusStop.latitude,
-                                                    longitude = targetBusStop.longitude
-                                                )
-
+                    if (multipleBusBool) {
+                        _multipleBusStopNameUiState.value = BusStopValue(
+                            busStopCode = targetBusStop.busStopCode,
+                            busStopRoadName = targetBusStop.busStopRoadName,
+                            busStopDescription = targetBusStop.busStopDescription,
+                            latitude = targetBusStop.latitude,
+                            longitude = targetBusStop.longitude
+                        )
+                    }
+                    else {
+                        _busStopNameUiState.value = BusStopValue(
+                            busStopCode = targetBusStop.busStopCode,
+                            busStopRoadName = targetBusStop.busStopRoadName,
+                            busStopDescription = targetBusStop.busStopDescription,
+                            latitude = targetBusStop.latitude,
+                            longitude = targetBusStop.longitude
+                        )
+                    }
                 }
 
                 BusStopNameUiState.Success(targetBusStop.busStopRoadName)
@@ -237,8 +238,8 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     private fun getMultipleBusTimings(busRoutes: List<BusStopInRoute>) {
         var busArrivalsJSONList: MutableList<SingaporeBus> = mutableListOf(SingaporeBus())
         var busStopDetailsJSONList: MutableList<BusStopValue> = mutableListOf(BusStopValue())
-
         val numberBusStopsInRoute = busRoutes.size - 1
+
         Log.d("debug2", "Number of BusStops: ${busRoutes}")
         viewModelScope.launch {
             busUiState = BusUiState.Loading
@@ -254,30 +255,30 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                         busServiceNumber = null
                     )
 
-                    // Update the UI State
-                    _busServiceUiState.value = SingaporeBus(
-                        metaData = currentListResult.metaData,
-                        busStopCode = currentListResult.busStopCode,
-                        services = currentListResult.services
-                    )
+//                    // Update the UI State
+//                    _busServiceUiState.value = SingaporeBus(
+//                        metaData = currentListResult.metaData,
+//                        busStopCode = currentListResult.busStopCode,
+//                        services = currentListResult.services
+//                    )
 
                     // Use UIState to append to List
                     busArrivalsJSONList.add(SingaporeBus(
-                        metaData = _busServiceUiState.value.metaData,
-                        busStopCode = _busServiceUiState.value.busStopCode,
-                        services = _busServiceUiState.value.services
+                        metaData = currentListResult.metaData,
+                        busStopCode = currentListResult.busStopCode,
+                        services = currentListResult.services
                     ))
 
                     // Update UI State for Bus Details
-                    getBusStopNames(currentBusStopCode.toInt())
+                    getBusStopNames(currentBusStopCode.toInt(), true)
 
                     // Use Updated UI State to append to List
                     busStopDetailsJSONList.add(BusStopValue(
-                        busStopCode = _busStopNameUiState.value.busStopCode,
-                        busStopRoadName = _busStopNameUiState.value.busStopRoadName,
-                        busStopDescription = _busStopNameUiState.value.busStopDescription,
-                        longitude = _busStopNameUiState.value.longitude,
-                        latitude = _busStopNameUiState.value.latitude,
+                        busStopCode = _multipleBusStopNameUiState.value.busStopCode,
+                        busStopRoadName = _multipleBusStopNameUiState.value.busStopRoadName,
+                        busStopDescription = _multipleBusStopNameUiState.value.busStopDescription,
+                        longitude = _multipleBusStopNameUiState.value.longitude,
+                        latitude = _multipleBusStopNameUiState.value.latitude,
                     ))
                 }
 
@@ -287,6 +288,14 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                     busStopDetailsJSONList = busStopDetailsJSONList,
                     busRoutesList = busRoutes,
                 )
+                _busStopNameUiState.value = BusStopValue(
+                    busStopCode = _multipleBusStopNameUiState.value.busStopCode,
+                    busStopRoadName = _multipleBusStopNameUiState.value.busStopRoadName,
+                    busStopDescription = _multipleBusStopNameUiState.value.busStopDescription,
+                    longitude = _multipleBusStopNameUiState.value.longitude,
+                    latitude = _multipleBusStopNameUiState.value.latitude,
+                )
+
                 BusUiState.Success(busTimings = currentListResult)
             }
             catch (e: IOException) {
