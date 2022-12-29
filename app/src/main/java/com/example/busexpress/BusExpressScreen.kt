@@ -245,6 +245,7 @@ fun BusExpressApp(
         val busServiceUiState by viewModel.busServiceUiState.collectAsState()
         val busStopNameUiState by viewModel.busStopNameUiState.collectAsState()
         val busRouteUiState by viewModel.busRouteUiState.collectAsState()
+        val multipleBusUiState by viewModel.multipleBusUiState.collectAsState()
 
         // State Variables
         val busServiceBoolUiState = viewModel.busServiceBoolUiState
@@ -279,7 +280,8 @@ fun BusExpressApp(
                         busRouteArray = busRouteUiState.busRouteArray
                     ),
                     busServiceBool = busServiceBoolUiState,
-                    appViewModel = viewModel
+                    viewModel = viewModel,
+                    busServicesRouteList = multipleBusUiState
                 )
             }
 

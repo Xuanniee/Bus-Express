@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -43,7 +44,7 @@ fun BusStopComposable(
 //    val busRouteArray: List<BusStopInRoute> = busRoutes.busRouteArray
 
     // Store the Variable State if Bus is Expanded
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     Column {
         Row(
@@ -108,25 +109,6 @@ fun BusStopComposable(
                         modifier = Modifier.padding(3.dp)
                     )
                 }
-//                if (!busServiceBool) {
-//                    items(currentBusStopServices) { currentBusStopService ->
-//                        ExpandedBusStop(
-//                            currentBusStopService = currentBusStopService,
-//                            modifier = Modifier.padding(3.dp)
-//                        )
-//                    }
-//                }
-//                // Arrival Timing for Bus Service Numbers
-//                else {
-//                    items(busRouteArray) { currentBusStopInRoute ->
-//
-//                        ExpandedBusServices(
-//                            currentBusStop = currentBusStopInRoute,
-//                            busStopServices = currentBusStopServices,
-//                            appViewModel = appViewModel
-//                        )
-//                    }
-//                }
             }
 
         }

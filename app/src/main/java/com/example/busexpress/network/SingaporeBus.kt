@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SingaporeBus(
     @SerialName(value = "odata.metadata")
-    val metaData: String = "Default Placeholder",
+    val metaData: String = "http://datamall2.mytransport.sg/ltaodataservice/${'$'}metadata#BusArrivalv2/@Element",
 
     @SerialName(value = "BusStopCode")
     val busStopCode: String = "Default Placeholder",
@@ -78,7 +78,7 @@ data class NextBusTiming(
 @Serializable
 data class BusStop(
     @SerialName(value = "odata.metadata")
-    val metaData: String,
+    val metaData: String = "http://datamall2.mytransport.sg/ltaodataservice/${'$'}metadata#BusStops",
 
     // No Bus Stops should be an Empty List and not Null
     val value: List<BusStopValue> = listOf(BusStopValue())
@@ -190,3 +190,12 @@ data class BusOccupancyResults(
         return result
     }
 }
+
+/**
+ * Data Class to Hold all the Bus Stops in the Route
+ */
+data class BusServicesRoute(
+    val busArrivalsJSONList: MutableList<SingaporeBus> = mutableListOf(SingaporeBus()),
+    val busStopDetailsJSONList: MutableList<BusStopValue> = mutableListOf(BusStopValue()),
+    val busRoutesList: List<BusStopInRoute> = listOf(BusStopInRoute()),
+)

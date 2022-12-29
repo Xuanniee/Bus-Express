@@ -3,6 +3,8 @@ package com.example.busexpress.ui.screens
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,10 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.busexpress.R
 import com.example.busexpress.determineBusServiceorStop
 import com.example.busexpress.network.BusRoutes
+import com.example.busexpress.network.BusServicesRoute
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.component.BusStopComposable
@@ -34,11 +34,12 @@ import com.example.busexpress.ui.component.BusStopComposable
 fun DefaultScreen(
     busUiState: BusUiState,
     modifier: Modifier = Modifier,
-    appViewModel: AppViewModel = viewModel(),
     busArrivalsJson: SingaporeBus,
     busRoutes: BusRoutes,
     busServiceBool: Boolean,
-    busStopDetails: BusStopValue
+    viewModel: AppViewModel,
+    busStopDetails: BusStopValue,
+    busServicesRouteList: BusServicesRoute
 ) {
     // Mutable State for User Input
     var userInput = remember {
@@ -59,24 +60,7 @@ fun DefaultScreen(
                 imeAction = ImeAction.Search
             ),
             onKeyboardSearch = {
-                // TODO Create a Helper Function to determine if User keyed in a Bus Service Number or Bus Stop Code
-                val userInputResult = determineBusServiceorStop(userInput = userInput.value.text)
-
-                // Using the ViewModel to call the 2 Functions to get Bus Stop Details & Timings
-                appViewModel.getBusStopNames(userInput.value.text.toInt())
-
-                if (userInputResult.busStopCodeBool) {
-                    // User provided Bus Stop Code
-                    appViewModel.getBusTimings(userInput.value.text)
-                }
-                else {
-                    // User provided Bus Service Number
-                    appViewModel.getBusRoutes(targetBusService = userInputResult.busServiceNo)
-                    val busRoutesArray = busRoutes.busRouteArray
-                    for (busStop in busRoutesArray) {
-                        appViewModel.getBusTimings(userInput = busStop.busStopCode)
-                    }
-                }
+                viewModel.determineUserQuery(userInput = userInput.value.text)
                 // Close the Onscreen Keyboard
 
             }
@@ -89,7 +73,7 @@ fun DefaultScreen(
                     busArrivalsJSON = busArrivalsJson,
                     busRoutes = busRoutes,
                     busServiceBool = busServiceBool,
-                    appViewModel = appViewModel
+                    busServicesRouteList = busServicesRouteList,
                 )
             }
             is BusUiState.Loading -> {
@@ -140,26 +124,34 @@ fun ResultScreen(
     busArrivalsJSON: SingaporeBus,
     busRoutes: BusRoutes,
     busServiceBool: Boolean,
-    appViewModel: AppViewModel = viewModel(),
+    busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier,
 ) {
     // Results of Search
     if (busServiceBool) {
         // Bus Services
         val busRouteArray = busRoutes.busRouteArray
-        val busRouteArrayLength = busRouteArray.size - 1
 
-        for (index in 0..busRouteArrayLength) {
-            Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+        LazyColumn(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(all = 10.dp)
+        ) {
+            items(busRouteArray.size) {index ->
+                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
 
-            BusStopComposable(
-                busArrivalsJSON = busArrivalsJSON,
-                busStopDetailsJSON = busStopDetails,
-                busRoutes = busRoutes,
-                modifier = modifier
-            )
+                BusStopComposable(
+                    busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
+                    busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
+                    busRoutes = BusRoutes(
+                        metaData = busServicesRouteList.busArrivalsJSONList[0].metaData,
+                        busRouteArray = busServicesRouteList.busRoutesList
+                    ),
+                    modifier = modifier
+                )
 
-            Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+            }
         }
 
     }
