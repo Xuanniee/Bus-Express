@@ -1,15 +1,20 @@
 package com.example.busexpress.ui.component
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -17,11 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.busexpress.R
-import com.example.busexpress.determineBusServiceorStop
 import com.example.busexpress.network.*
-import com.example.busexpress.ui.screens.AppViewModel
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -31,7 +33,6 @@ import java.time.format.DateTimeFormatter
 fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
     busStopDetailsJSON: BusStopValue,
-    busRoutes: BusRoutes,
     busServiceBool: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -128,22 +129,6 @@ fun BusStopComposable(
             }
         }
     }
-}
-
-@Composable
-fun ExpandedBusServices(
-    currentBusStop: BusStopInRoute,
-    busStopServices: List<SingaporeBusServices>,
-    appViewModel: AppViewModel,
-) {
-    // Get Current Bus Stop Code and Use it to get the Timings of all the Buses Available at the Bus Stop
-    val currentBusStopCode = currentBusStop.busStopCode
-    appViewModel.getBusTimings(currentBusStopCode)
-
-    // For Loop for all the Buses available at Bus Stop
-    val busStopServicesLength = busStopServices.size - 1
-
-
 }
 
 @Composable
@@ -345,8 +330,7 @@ fun ExpandedBusStop(
             }
 
             // Wheelchair + Bus Type
-            Row(
-            ) {
+            Row{
                 // Bus Type
                 if (nextBusTypeArray[2] != 0) {
                     Text(
