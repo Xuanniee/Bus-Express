@@ -4,17 +4,19 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.twotone.Email
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -22,10 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.busexpress.network.BusRoutes
-import com.example.busexpress.network.BusStopValue
-import com.example.busexpress.network.SingaporeBus
-import com.example.busexpress.network.userInputResult
+import com.example.busexpress.network.*
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
 import com.example.busexpress.ui.theme.NavigationDrawer
@@ -68,10 +67,10 @@ fun BusExpressAppTopBar(
         },
         actions = {
             // Already in a RowScope, so will be placed Horizontally
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { /*TODO DARK MODE*/ }) {
                 Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(R.string.more_settings_description)
+                    imageVector = Icons.Filled.DarkMode,
+                    contentDescription = stringResource(R.string.dark_mode_description)
                 )
 
             }
@@ -149,7 +148,10 @@ fun BusExpressNavigationDrawer(
             modifier = modifier.padding(2.dp)
         )
 
-        // Navigation Options
+        /**
+         *  Navigation Options / Buttons
+         */
+        // Home
         Button(
             onClick = {
                 // Navigate to the Desired Route
@@ -167,7 +169,24 @@ fun BusExpressNavigationDrawer(
             )
             Text(stringResource(R.string.home_navigation_desc))
         }
+        // Search
+        Button(
+            onClick = {
+                navController.navigate(BusExpressScreen.Search.name)
+                scope.launch { scaffoldState.drawerState.close() }
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(all = 5.dp)
+        ) {
+            Image(
+                imageVector = Icons.Filled.Search,
+                contentDescription = stringResource(R.string.search_nav_desc)
+            )
+            Text(stringResource(id = R.string.search_nav_desc))
+        }
 
+        // Favourites
         Button(
             onClick = {
                 navController.navigate(BusExpressScreen.FavouritesAway.name)
@@ -199,6 +218,20 @@ fun BusExpressNavigationDrawer(
             )
             Text(text = stringResource(R.string.nearby_navigation_desc))
         }
+
+        // Easter Egg Button
+//        Button(
+//            onClick = {
+//
+//            },
+//            modifier = modifier
+//        ) {
+//            Image(
+//                imageVector = Icons.Filled,
+//                contentDescription =
+//            )
+//
+//        }
 
     }
 
@@ -256,14 +289,19 @@ fun BusExpressApp(
         // NavHost Composable for Navigating between Screens
         NavHost(
             navController = navController,
-            startDestination = BusExpressScreen.Default.name,
+            startDestination = BusExpressScreen.Search.name,
             modifier = modifier.padding(innerPadding)
         ) {
             // Routes for Every Screen in the App
 
             // 1. Default Screen (For Nearby Bus-stops)
             composable(route = BusExpressScreen.Default.name) {
-                DefaultScreen(
+                DefaultScreen()
+            }
+
+            // 2. Search Screen
+            composable(route = BusExpressScreen.Search.name) {
+                SearchScreen(
                     busUiState = viewModel.busUiState,
                     busArrivalsJson = SingaporeBus(
                         metaData = busServiceUiState.metaData,
@@ -283,18 +321,19 @@ fun BusExpressApp(
                     ),
                     busServiceBool = busServiceBoolUiState,
                     viewModel = viewModel,
-                    busServicesRouteList = multipleBusUiState
+                    busServicesRouteList = multipleBusUiState,
+                    currentScreen = currentScreen
                 )
             }
 
-            // 2. Search Screen
+            // 3. Nearby Screen
             composable(route = BusExpressScreen.Nearby.name) {
                 NearbyScreen()
             }
 
             // 3. Favourites [Going Out]
             composable(route = BusExpressScreen.FavouritesAway.name) {
-                FavouritesGoingOutScreen()
+                FavouritesScreen()
             }
 
             // 4. Favourites [Coming Back]
@@ -303,9 +342,7 @@ fun BusExpressApp(
             }
 
             // 5. Search Results
-            composable(route = BusExpressScreen.Search.name) {
-                SearchResultScreen()
-            }
+
 
         }
 
@@ -317,7 +354,7 @@ fun BusExpressApp(
 /**
  *  Determine the type of User Input
  */
-fun determineBusServiceorStop(userInput: String?): userInputResult {
+fun determineBusServiceorStop(userInput: String?): UserInputResult {
     // Determine if UserInput is a BusStopCode
     var busStopCode: String?
     var busServiceNumber: String?
@@ -336,7 +373,7 @@ fun determineBusServiceorStop(userInput: String?): userInputResult {
         busServiceNumber = userInput
     }
 
-    return userInputResult(
+    return UserInputResult(
         busServiceBool = !busStopCodeBool,
         busStopCodeBool = busStopCodeBool,
         busStopCode = busStopCode,

@@ -158,7 +158,7 @@ data class BusStopInRoute(
 /**
  * Data Class to hold result of parsed User Input
  */
-data class userInputResult(
+data class UserInputResult(
     val busStopCodeBool: Boolean,
     val busServiceBool: Boolean,
     val busStopCode: String?,

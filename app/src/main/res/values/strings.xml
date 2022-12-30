@@ -4,7 +4,7 @@
     <string name="favourites_back">Coming Back [Favourites]</string>
     <string name="nearby">Nearby</string>
     <string name="navbar_description">Main Navigation Menu</string>
-    <string name="more_settings_description">More Settings</string>
+    <string name="dark_mode_description">Dark Mode</string>
     <string name="search_field_instructions">Provide a bus stop or bus number here!!</string>
     <string name="search">Search</string>
     <string name="home_navigation_desc">Home</string>
@@ -25,4 +25,6 @@
     <string name="double_deck_bus_type">Double</string>
     <string name="bendy_bus_type">Bendy</string>
     <string name="bus_composable_menu_desc">Additional Menu Options</string>
+    <string name="search_loading_screen_desc">Your search results will appear here!!</string>
+    <string name="search_nav_desc">Search</string>
 </resources>

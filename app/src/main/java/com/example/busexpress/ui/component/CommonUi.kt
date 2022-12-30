@@ -90,6 +90,7 @@ fun BusStopComposable(
                 BusComposableRefreshButton(
                     onClick = {
                         // TODO Refresh
+
                     }
                 )
             }
@@ -195,8 +196,9 @@ fun ExpandedBusStop(
     val currentBusService = currentBusStopService.busServiceNumber
 
     Divider(
-        thickness = 2.dp,
-        modifier = modifier.padding(1.dp)
+        thickness = 1.dp,
+        modifier = modifier.padding(1.dp),
+        color = MaterialTheme.colors.secondary
     )
 
     Row {
@@ -355,8 +357,9 @@ fun ExpandedBusStop(
     }
 
     Divider(
-        thickness = 2.dp,
-        modifier = modifier.padding(1.dp)
+        thickness = 1.dp,
+        modifier = modifier.padding(1.dp),
+        color = MaterialTheme.colors.secondary
     )
 }
 
