@@ -45,6 +45,10 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     private val _multipleBusStopNameUiState = MutableStateFlow(BusStopValue())
     val multipleBusStopNameUiState: StateFlow<BusStopValue> = _multipleBusStopNameUiState.asStateFlow()
 
+    /**
+     * StateFlow
+     */
+
     /** The mutable State that stores the status of the most recent request */
     var busUiState: BusUiState by mutableStateOf(BusUiState.Loading)     // Loading as Default Value
         // Setter is private to protect writes to the busUiState
@@ -285,7 +289,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         }
     }
 
-    suspend fun getBusTimings(userInput: String?) {
+    private suspend fun getBusTimings(userInput: String?) {
         // Determine if UserInput is a BusStopCode
         val userInputResult = determineBusServiceorStop(userInput = userInput)
         val busStopCode = userInputResult.busStopCode

@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FavouritesScreen(
-
 ) {
     // Variable to remember Tab Row
     var tapRowState by rememberSaveable { mutableStateOf(0) }
@@ -40,10 +39,10 @@ fun FavouritesScreen(
             }
         }
         if (tapRowState == 0) {
-            Text("Going Out")
+            Text(tapRowTitles[tapRowState])
         }
         else if (tapRowState == 1) {
-            Text("Coming Back")
+            Text(tapRowTitles[tapRowState])
         }
     }
 

@@ -1,7 +1,9 @@
 package com.example.busexpress.ui.screens
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,14 +14,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,10 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
-import com.example.busexpress.network.BusRoutes
-import com.example.busexpress.network.BusServicesRoute
-import com.example.busexpress.network.BusStopValue
-import com.example.busexpress.network.SingaporeBus
+import com.example.busexpress.network.*
 import com.example.busexpress.ui.component.BusStopComposable
 
 @Composable
@@ -170,30 +168,117 @@ fun ResultScreen(
     busServiceBool: Boolean,
     busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier,
-) {
-    // Results of Search
+) = // Results of Search
     if (busServiceBool) {
         // Bus Services
         val busRouteArray = busRoutes.busRouteArray
+        val busRouteArrayLength = busRouteArray.size
+        val busRouteArrayMaxIndex = busRouteArrayLength - 1
+        Log.d("debugTag", "Bus Route Array Size is $busRouteArrayLength")
 
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(all = 10.dp)
-        ) {
-            items(busRouteArray.size) {index ->
-                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
-
-                BusStopComposable(
-                    busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
-                    busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
-                    busServiceBool = busServiceBool,
-                    modifier = modifier
-                )
-
-                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+        // Store the Routes in 2 Arrays
+        val busRouteArray1 = mutableListOf<BusStopInRoute>()
+        val busRouteArray2 = mutableListOf<BusStopInRoute>()
+        for (i in 0..busRouteArrayMaxIndex) {
+            if (busRouteArray[i].routeDirection == 1) {
+                busRouteArray1.add(busRouteArray[i])
+            }
+            else {
+                busRouteArray2.add(busRouteArray[i])
             }
         }
+
+        val busRouteArray1Length = busRouteArray1.size
+        val busRouteArray2Length = busRouteArray2.size
+        // Mutable State to keep track of which Tab we are at
+        var tapRowState by rememberSaveable { mutableStateOf(0) }
+        val tapRowTitles = mutableListOf<String>("${busServicesRouteList.busStopDetailsJSONList[busRouteArray1Length - 1].busStopDescription}", "${busServicesRouteList.busStopDetailsJSONList.last().busStopDescription}")
+
+        Column(
+            modifier = modifier.fillMaxWidth()
+        ) {
+            // Navigation Bar for Going Out & Coming Back
+            TabRow(
+                selectedTabIndex = tapRowState,
+                backgroundColor = MaterialTheme.colors.background,
+                contentColor = Color.Black
+            ) {
+                tapRowTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = (tapRowState == index),
+                        onClick = {
+                            tapRowState = index
+                        },
+                        text = {
+                            Text(
+                                text = title,
+                                fontWeight = if (tapRowState == index) FontWeight.ExtraBold else FontWeight.SemiBold
+                            )
+                        },
+//                        selectedContentColor = MaterialTheme.colors.primary,
+//                        unselectedContentColor = MaterialTheme.colors.secondary
+                    )
+                }
+            }
+            if (tapRowState == 0) {
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(all = 10.dp)
+                ) {
+                    items(busRouteArray1Length) {index ->
+                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+                        BusStopComposable(
+                            busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
+                            busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
+                            busServiceBool = busServiceBool,
+                            modifier = modifier
+                        )
+
+                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    }
+                }
+            }
+            else if (tapRowState == 1) {
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(all = 10.dp)
+                ) {
+                    items(busRouteArray2Length) {index ->
+                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+                        BusStopComposable(
+                            busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index+busRouteArray1Length],
+                            busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index+busRouteArray1Length],
+                            busServiceBool = busServiceBool,
+                            modifier = modifier
+                        )
+
+                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    }
+                }
+            }
+        }
+//        LazyColumn(
+//            modifier = modifier
+//                .fillMaxWidth()
+//                .padding(all = 10.dp)
+//        ) {
+//            items(busRouteArray1Length) {index ->
+//                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+//
+//                BusStopComposable(
+//                    busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
+//                    busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
+//                    busServiceBool = busServiceBool,
+//                    modifier = modifier
+//                )
+//
+//                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+//            }
+//        }
 
     }
     else {
@@ -209,7 +294,6 @@ fun ResultScreen(
 
         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
     }
-}
 
 
 @Composable
