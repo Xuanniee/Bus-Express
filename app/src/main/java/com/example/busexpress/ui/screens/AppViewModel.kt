@@ -102,15 +102,16 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                 // API Call
                 val listResult = singaporeBusRepository.getBusRoutes(skipIndex)
                 val busStopRoute = listResult.busRouteArray
-                val busStopRouteLength = busStopRoute.size
+                Log.d("debugger", "This is my busStopRoute: $busStopRoute")
+                val busStopRouteLength = busStopRoute.size - 1
 
                 // 500 since according to LTA Record each API Call is confined to 500 Records
-                for (i in 1..busStopRouteLength) {
+                for (i in 0..busStopRouteLength) {
                     // Must compare string since Bus Services like 901M exist
                     if (busStopRoute[iteratorIndex].serviceNo == targetBusService) {
                         // Found a Bus Stop of Route, append to Result Array
-                        Log.d("debug", "What value is : ${busStopRoute[i].serviceNo}")
-                        targetServiceRoute.add(busStopRoute[i])
+                        Log.d("debug", "What value is : ${busStopRoute[iteratorIndex].serviceNo}")
+                        targetServiceRoute.add(busStopRoute[iteratorIndex])
                         if (busStopRoute[iteratorIndex].stopSequence != 1) {
                             targetRouteFound = true
                         }
@@ -238,12 +239,12 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                     busServiceNumber = null
                 )
 
-//                    // Update the UI State
-//                    _busServiceUiState.value = SingaporeBus(
-//                        metaData = currentListResult.metaData,
-//                        busStopCode = currentListResult.busStopCode,
-//                        services = currentListResult.services
-//                    )
+//                // Update the UI State
+//                _busServiceUiState.value = SingaporeBus(
+//                    metaData = currentListResult.metaData,
+//                    busStopCode = currentListResult.busStopCode,
+//                    services = currentListResult.services
+//                )
 
                 // Use UIState to append to List
                 busArrivalsJSONList.add(SingaporeBus(
@@ -266,6 +267,8 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
             }
 
             // Update the UI Variable for the List
+            busArrivalsJSONList.removeAt(0)
+            busStopDetailsJSONList.removeAt(0)
             _multipleBusUiState.value = BusServicesRoute(
                 busArrivalsJSONList = busArrivalsJSONList,
                 busStopDetailsJSONList = busStopDetailsJSONList,
