@@ -33,6 +33,7 @@ import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
 import com.example.busexpress.network.*
 import com.example.busexpress.ui.component.BusStopComposable
+import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 
 @Composable
 fun SearchScreen(
@@ -45,6 +46,7 @@ fun SearchScreen(
     busStopDetails: BusStopValue,
     busServicesRouteList: BusServicesRoute,
     currentScreen: BusExpressScreen,
+    favouriteBusStopViewModel: FavouriteBusStopViewModel
 ) {
     // Mutable State for User Input
     val userInput = remember {
@@ -83,7 +85,8 @@ fun SearchScreen(
                     busArrivalsJSON = busArrivalsJson,
                     busServiceBool = busServiceBool,
                     busServicesRouteList = busServicesRouteList,
-                    busRoutes = busRoutes
+                    busRoutes = busRoutes,
+                    favouriteBusStopViewModel = favouriteBusStopViewModel
                 )
             }
             is BusUiState.Loading -> {
@@ -168,6 +171,7 @@ fun ResultScreen(
     busServiceBool: Boolean,
     busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier,
+    favouriteBusStopViewModel: FavouriteBusStopViewModel,
 ) = // Results of Search
     if (busServiceBool) {
         // Bus Services
@@ -192,7 +196,16 @@ fun ResultScreen(
         val busRouteArray2Length = busRouteArray2.size
         // Mutable State to keep track of which Tab we are at
         var tapRowState by rememberSaveable { mutableStateOf(0) }
-        val tapRowTitles = mutableListOf<String>("${busServicesRouteList.busStopDetailsJSONList[busRouteArray1Length - 1].busStopDescription}", "${busServicesRouteList.busStopDetailsJSONList.last().busStopDescription}")
+        val tapRowTitles = mutableListOf<String>(
+            "${busServicesRouteList.busStopDetailsJSONList[busRouteArray1Length - 1].busStopDescription}",
+            "${busServicesRouteList.busStopDetailsJSONList.last().busStopDescription}"
+        )
+
+        // Ensure only 1 Tab if it is a Loop bus, i.e. the Start and End Bus Stop are the same
+        if (tapRowTitles[0] == tapRowTitles[1]) {
+            // Remove the Second Tab
+            tapRowTitles.removeAt(1)
+        }
 
         Column(
             modifier = modifier.fillMaxWidth()
@@ -233,7 +246,8 @@ fun ResultScreen(
                             busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
                             busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
                             busServiceBool = busServiceBool,
-                            modifier = modifier
+                            modifier = modifier,
+                            favouriteViewModel = favouriteBusStopViewModel
                         )
 
                         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -253,7 +267,8 @@ fun ResultScreen(
                             busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index+busRouteArray1Length],
                             busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index+busRouteArray1Length],
                             busServiceBool = busServiceBool,
-                            modifier = modifier
+                            modifier = modifier,
+                            favouriteViewModel = favouriteBusStopViewModel
                         )
 
                         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -289,7 +304,8 @@ fun ResultScreen(
             busArrivalsJSON = busArrivalsJSON,
             busStopDetailsJSON = busStopDetails,
             modifier = modifier,
-            busServiceBool = busServiceBool
+            busServiceBool = busServiceBool,
+            favouriteViewModel = favouriteBusStopViewModel,
         )
 
         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))

@@ -14,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.busexpress.data.FavouriteBusStop
 import com.example.busexpress.network.BusServicesRoute
 import com.example.busexpress.ui.component.BusStopComposable
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
@@ -50,49 +51,44 @@ fun FavouritesScreen(
                 )
             }
         }
+
         if (tapRowState == 0) {
             // Call Function to get Favourites
             favouriteBusStopViewModel.retrieveFavouriteBusStops(true)
-            // Retrieve Bus Stops
-            val busStopList = goingOutFavouriteUiState.busStopList
-            val busStopListLength = busStopList.size
-
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(all = 10.dp)
-            ) {
-                items(busStopListLength) { index ->
-                    // Retrieve Current Bus Stop
-                    val currentBusStop = busStopList[index]?.favouriteBusStopCode
-                    // Use Bus Stop Code to get Bus Details and Stuff
-                    viewModel.determineUserQuery(currentBusStop.toString())
-
-
-                    // UI Layer
-                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
-
-                    BusStopComposable(
-                        busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
-                        busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
-                        busServiceBool = false,
-                        modifier = modifier,
-                        favouriteViewModel = favouriteBusStopViewModel
-                    )
-
-                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
             }
-
-            }
-        }
         else if (tapRowState == 1) {
-            Text("HELLO")
-//            favouriteBusStopViewModel.retrieveFavouriteBusStops(false)
+            favouriteBusStopViewModel.retrieveFavouriteBusStops(false)
+        }
+        // Retrieve Bus Stops
+        val busStopList = goingOutFavouriteUiState.busStopList
+        val busStopListLength = busStopList.size
 
+        LazyColumn(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(all = 10.dp)
+        ) {
+            items(busStopListLength) { index ->
+                // Retrieve Current Bus Stop
+                val currentBusStop = busStopList[index]?.favouriteBusStopCode
+                // Use Bus Stop Code to get Bus Details and Stuff
+                viewModel.determineUserQuery(currentBusStop.toString())
+
+                // UI Layer
+                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+                BusStopComposable(
+                    busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
+                    busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
+                    busServiceBool = false,
+                    modifier = modifier,
+                    favouriteViewModel = favouriteBusStopViewModel
+                )
+
+                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+            }
         }
     }
-
-
 }
 
 

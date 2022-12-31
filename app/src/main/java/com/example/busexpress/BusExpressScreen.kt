@@ -328,6 +328,7 @@ fun BusExpressApp(
                     viewModel = viewModel,
                     busServicesRouteList = multipleBusUiState,
                     currentScreen = currentScreen,
+                    favouriteBusStopViewModel = favouriteBusStopViewModel,
                 )
             }
 
@@ -341,7 +342,7 @@ fun BusExpressApp(
                 FavouritesScreen(
                     viewModel = viewModel,
                     busServicesRouteList = multipleBusUiState,
-                    favouriteBusStopViewModel = favouriteBusStopViewModel
+                    favouriteBusStopViewModel = favouriteBusStopViewModel,
                 )
             }
 

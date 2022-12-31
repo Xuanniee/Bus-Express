@@ -32,7 +32,7 @@ fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
     busStopDetailsJSON: BusStopValue,
     busServiceBool: Boolean,
-    favouriteViewModel: FavouriteBusStopViewModel = viewModel(),
+    favouriteViewModel: FavouriteBusStopViewModel,
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
