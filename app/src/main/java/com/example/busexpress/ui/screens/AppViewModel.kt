@@ -1,6 +1,5 @@
 package com.example.busexpress.ui.screens
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +13,7 @@ import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
 import com.example.busexpress.determineBusServiceorStop
 import com.example.busexpress.network.*
+import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -328,6 +328,13 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                 val application = (this[APPLICATION_KEY] as BusExpressApplication)
                 val singaporeBusRepository = application.container.singaporeBusRepository
                 AppViewModel(singaporeBusRepository = singaporeBusRepository)
+            }
+
+            /**
+             * Initializer for FavBusStopViewModel
+             */
+            initializer {
+                FavouriteBusStopViewModel(BusExpressApplication().container.favouriteBusStopRepository)
             }
         }
     }

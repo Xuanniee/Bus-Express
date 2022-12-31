@@ -1,6 +1,10 @@
 package com.example.busexpress.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
@@ -11,14 +15,28 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.busexpress.network.BusServicesRoute
+import com.example.busexpress.network.BusStopValue
+import com.example.busexpress.ui.AppViewModelProvider
+import com.example.busexpress.ui.AppViewModelProvider.Factory
+import com.example.busexpress.ui.component.BusStopComposable
+import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import kotlinx.coroutines.launch
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun FavouritesScreen(
+    favouriteBusStopViewModel: FavouriteBusStopViewModel = viewModel(factory = Factory),
+    viewModel: AppViewModel,
+    busServicesRouteList: BusServicesRoute,
+    modifier: Modifier = Modifier
 ) {
     // Variable to remember Tab Row
     var tapRowState by rememberSaveable { mutableStateOf(0) }
     val tapRowTitles = listOf("Going Out", "Coming Back")
+    val goingOutFavouriteUiState by favouriteBusStopViewModel.goingOutUiState.collectAsState()
 
     Column() {
         // Navigation Bar for Going Out & Coming Back
@@ -39,31 +57,48 @@ fun FavouritesScreen(
             }
         }
         if (tapRowState == 0) {
-            Text(tapRowTitles[tapRowState])
+            // Call Function to get Favourites
+            favouriteBusStopViewModel.retrieveFavouriteBusStops(true)
+            // Retrieve Bus Stops
+            val busStopList = goingOutFavouriteUiState.busStopList
+            val busStopListLength = busStopList.size
+
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(all = 10.dp)
+            ) {
+                items(busStopListLength) { index ->
+                    // Retrieve Current Bus Stop
+                    val currentBusStop = busStopList[index]?.favouriteBusStopCode
+                    // Use Bus Stop Code to get Bus Details and Stuff
+                    viewModel.determineUserQuery(currentBusStop.toString())
+
+
+                    // UI Layer
+                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+                    BusStopComposable(
+                        busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
+                        busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
+                        busServiceBool = false,
+                        modifier = modifier,
+//                        favouriteViewModel = favouriteBusStopViewModel
+                    )
+
+                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+            }
+
+            }
         }
         else if (tapRowState == 1) {
-            Text(tapRowTitles[tapRowState])
+            favouriteBusStopViewModel.retrieveFavouriteBusStops(false)
+
         }
     }
 
 
 }
-
-
-@Composable
-fun TravellingDirectionAppBar(
-    tapRowTitles: List<String>,
-//    tapRowIcons: List<String>,
-) {
-
-}
-
-
-
-
-
-
-
 
 
 

@@ -1,5 +1,7 @@
 package com.example.busexpress.data
 
+import android.content.Context
+import com.example.busexpress.data.database.FavouritesBusDatabase
 import com.example.busexpress.network.BusApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -17,9 +19,10 @@ import retrofit2.Retrofit
 interface AppContainer {
     // Abstract Properties
     val singaporeBusRepository: SingaporeBusRepository
+    val favouriteBusStopRepository: FavouriteBusStopRepository
 }
 
-class DefaultAppContainer(): AppContainer {
+class DefaultAppContainer(private val context: Context): AppContainer {
     // TODO Replace the Bus Code with User Query
     // URL does not include query parameters like ServiceNo and BusStopCode
     private val BASE_URL =
@@ -38,6 +41,10 @@ class DefaultAppContainer(): AppContainer {
     // Override the Property in the Interface
     override val singaporeBusRepository: SingaporeBusRepository by lazy {
         DefaultSingaporeBusRepository(retrofitService)
+    }
+
+    override val favouriteBusStopRepository: FavouriteBusStopRepository by lazy {
+        OfflineFavouriteBusRepository(FavouritesBusDatabase.getDatabase(context).favouriteBusDao())
     }
 }
 

@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.busexpress.network.*
+import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
 import com.example.busexpress.ui.theme.NavigationDrawer
@@ -242,7 +243,7 @@ fun BusExpressNavigationDrawer(
 fun BusExpressApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    viewModel: AppViewModel = viewModel()
+    viewModel: AppViewModel = viewModel(),
 ) {
     // Save Current Back Stack Entry
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -281,7 +282,9 @@ fun BusExpressApp(
         val busStopNameUiState by viewModel.busStopNameUiState.collectAsState()
         val busRouteUiState by viewModel.busRouteUiState.collectAsState()
         val multipleBusUiState by viewModel.multipleBusUiState.collectAsState()
-        val multipleBusStopNameUiState by viewModel.multipleBusStopNameUiState.collectAsState()
+//        val multipleBusStopNameUiState by viewModel.multipleBusStopNameUiState.collectAsState()
+
+//        val favouriteBusStopUiState = favouriteViewModel.favouriteBusStopUiState
 
         // State Variables
         val busServiceBoolUiState = viewModel.busServiceBoolUiState
@@ -290,14 +293,14 @@ fun BusExpressApp(
         // NavHost Composable for Navigating between Screens
         NavHost(
             navController = navController,
-            startDestination = BusExpressScreen.Search.name,
+            startDestination = BusExpressScreen.Default.name,
             modifier = modifier.padding(innerPadding)
         ) {
             // Routes for Every Screen in the App
 
             // 1. Default Screen (For Nearby Bus-stops)
             composable(route = BusExpressScreen.Default.name) {
-                DefaultScreen()
+                DefaultScreen(navController = navController)
             }
 
             // 2. Search Screen
@@ -323,7 +326,7 @@ fun BusExpressApp(
                     busServiceBool = busServiceBoolUiState,
                     viewModel = viewModel,
                     busServicesRouteList = multipleBusUiState,
-                    currentScreen = currentScreen
+                    currentScreen = currentScreen,
                 )
             }
 
@@ -335,7 +338,8 @@ fun BusExpressApp(
             // 3. Favourites [Going Out]
             composable(route = BusExpressScreen.FavouritesAway.name) {
                 FavouritesScreen(
-
+                    viewModel = viewModel,
+                    busServicesRouteList = multipleBusUiState,
                 )
             }
 
