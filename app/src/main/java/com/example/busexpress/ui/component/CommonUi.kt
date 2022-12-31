@@ -6,10 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -19,8 +16,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.busexpress.R
 import com.example.busexpress.network.*
+import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
@@ -32,7 +32,7 @@ fun BusStopComposable(
     busArrivalsJSON: SingaporeBus,
     busStopDetailsJSON: BusStopValue,
     busServiceBool: Boolean,
-//    favouriteViewModel: FavouriteBusStopViewModel,
+    favouriteViewModel: FavouriteBusStopViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
@@ -85,10 +85,11 @@ fun BusStopComposable(
                     onClick = {
                         coroutineScope.launch {
                             // Update the favouriteUiState to hold the current BusStopCode
-//                            favouriteViewModel.updateFavouriteUiState(favouriteBusStopCode = currentBusStopCode, goingOut = 0)
+                            favouriteViewModel.updateFavouriteUiState(favouriteBusStopCode = currentBusStopCode, goingOut = 0)
 
                             // Save it in the Database
-//                            favouriteViewModel.saveBusStop()
+                            favouriteViewModel.saveBusStop()
+
                         }
                         // TODO Menu Button
                     }

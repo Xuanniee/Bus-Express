@@ -4,20 +4,17 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.twotone.Email
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -25,7 +22,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.busexpress.network.*
+import com.example.busexpress.network.BusRoutes
+import com.example.busexpress.network.BusStopValue
+import com.example.busexpress.network.SingaporeBus
+import com.example.busexpress.network.UserInputResult
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
@@ -244,6 +244,7 @@ fun BusExpressApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: AppViewModel = viewModel(),
+    favouriteBusStopViewModel: FavouriteBusStopViewModel = viewModel(),
 ) {
     // Save Current Back Stack Entry
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -340,6 +341,7 @@ fun BusExpressApp(
                 FavouritesScreen(
                     viewModel = viewModel,
                     busServicesRouteList = multipleBusUiState,
+                    favouriteBusStopViewModel = favouriteBusStopViewModel
                 )
             }
 
@@ -363,8 +365,8 @@ fun BusExpressApp(
  */
 fun determineBusServiceorStop(userInput: String?): UserInputResult {
     // Determine if UserInput is a BusStopCode
-    var busStopCode: String?
-    var busServiceNumber: String?
+    val busStopCode: String?
+    val busServiceNumber: String?
     var busStopCodeBool = false
     val userInputLength = userInput?.length
 

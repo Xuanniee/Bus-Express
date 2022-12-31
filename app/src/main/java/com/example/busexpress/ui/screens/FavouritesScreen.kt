@@ -9,26 +9,20 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.busexpress.network.BusServicesRoute
-import com.example.busexpress.network.BusStopValue
-import com.example.busexpress.ui.AppViewModelProvider
-import com.example.busexpress.ui.AppViewModelProvider.Factory
 import com.example.busexpress.ui.component.BusStopComposable
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
-import kotlinx.coroutines.launch
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun FavouritesScreen(
-    favouriteBusStopViewModel: FavouriteBusStopViewModel = viewModel(factory = Factory),
+    favouriteBusStopViewModel: FavouriteBusStopViewModel,
     viewModel: AppViewModel,
     busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier
@@ -83,7 +77,7 @@ fun FavouritesScreen(
                         busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
                         busServiceBool = false,
                         modifier = modifier,
-//                        favouriteViewModel = favouriteBusStopViewModel
+                        favouriteViewModel = favouriteBusStopViewModel
                     )
 
                     Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -92,7 +86,8 @@ fun FavouritesScreen(
             }
         }
         else if (tapRowState == 1) {
-            favouriteBusStopViewModel.retrieveFavouriteBusStops(false)
+            Text("HELLO")
+//            favouriteBusStopViewModel.retrieveFavouriteBusStops(false)
 
         }
     }

@@ -4,6 +4,10 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.10'
 }
 
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-kapt'
+
 android {
     namespace 'com.example.busexpress'
     compileSdk 33
@@ -71,10 +75,12 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation "com.squareup.okhttp3:okhttp:4.7.2"
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
-    // Room
-    implementation "androidx.room:room-runtime:2.4.3"
-    implementation "androidx.room:room-ktx:2.4.3"
-    annotationProcessor("androidx.room:room-compiler:2.4.3")
+    // Room Database
+    def room_version = "2.4.3"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation 'androidx.room:room-ktx:2.2.1'
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'

@@ -6,7 +6,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.FavouriteBusStop
 import com.example.busexpress.data.FavouriteBusStopList
 import com.example.busexpress.data.FavouriteBusStopRepository
@@ -89,9 +93,20 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
         }
 
     }
-
+    // Factory Object to retrieve the singaporeBusRepository and pass it to the ViewModel
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
+        /**
+         * Initializer for FavBusStopViewModel
+         */
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application =
+                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BusExpressApplication)
+                val favouriteBusStopRepository = application.container.favouriteBusStopRepository
+                FavouriteBusStopViewModel(favouriteBusStopRepository = favouriteBusStopRepository)
+            }
+        }
     }
 }
 

@@ -329,13 +329,6 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                 val singaporeBusRepository = application.container.singaporeBusRepository
                 AppViewModel(singaporeBusRepository = singaporeBusRepository)
             }
-
-            /**
-             * Initializer for FavBusStopViewModel
-             */
-            initializer {
-                FavouriteBusStopViewModel(BusExpressApplication().container.favouriteBusStopRepository)
-            }
         }
     }
 
