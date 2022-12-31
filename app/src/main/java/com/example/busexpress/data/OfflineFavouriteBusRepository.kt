@@ -23,4 +23,6 @@ class OfflineFavouriteBusRepository(
     override fun retrieveGoingOutFavouriteBusStops(): Flow<List<FavouriteBusStop?>> = favouriteBusStopDao.retrieveGoingOutFavouriteBusStops()
 
     override fun retrieveComingBackFavouriteBusStops(): Flow<List<FavouriteBusStop?>> = favouriteBusStopDao.retrieveComingBackFavouriteBusStops()
+
+    override fun retrieveAllFavouriteBusStops(): Flow<List<FavouriteBusStop?>> = favouriteBusStopDao.retrieveAllFavouriteBusStops()
 }

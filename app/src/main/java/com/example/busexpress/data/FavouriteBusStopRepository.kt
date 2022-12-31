@@ -27,6 +27,8 @@ interface FavouriteBusStopRepository {
      */
     fun retrieveComingBackFavouriteBusStops(): Flow<List<FavouriteBusStop?>>
 
+    fun retrieveAllFavouriteBusStops(): Flow<List<FavouriteBusStop?>>
+
     /**
      * Insert bus stop into the data source. Remember database ops takes time, which is why we suspend
      */

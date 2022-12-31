@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,7 +47,7 @@ fun DefaultScreen(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.search_bar_icon),
-                contentDescription = "Click to Search for Buses",
+                contentDescription = stringResource(R.string.searchbar_redirect_content_desc),
                 tint = MaterialTheme.colors.primary
             )
         }
@@ -62,8 +63,25 @@ fun DefaultScreen(
             textAlign = TextAlign.Center
         )
 
+        // Tutorial
+        Text(
+            text = stringResource(R.string.tutorial_default_desc),
+            style = MaterialTheme.typography.body2,
+            fontWeight = FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            modifier = modifier.padding(5.dp)
+        )
+
     }
 
 }
 
-
+//@Composable
+//fun MessageList(messages: List<Message>) {
+//    Column {
+//        messages.forEach { message ->
+//            MessageRow(message)
+//        }
+//    }
+//}

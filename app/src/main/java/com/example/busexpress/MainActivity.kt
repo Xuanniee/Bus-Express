@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
                 val favViewModel: FavouriteBusStopViewModel =
                     viewModel(factory = FavouriteBusStopViewModel.Factory)
                 BusExpressApp(
-                    viewModel = viewModel,
+                    appViewModel = viewModel,
                     favouriteBusStopViewModel = favViewModel
                 )
             }

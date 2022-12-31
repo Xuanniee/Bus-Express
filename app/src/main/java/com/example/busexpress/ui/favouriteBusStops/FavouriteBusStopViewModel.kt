@@ -1,5 +1,6 @@
 package com.example.busexpress.ui.favouriteBusStops
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,10 +12,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
-import com.example.busexpress.data.FavouriteBusStop
-import com.example.busexpress.data.FavouriteBusStopList
-import com.example.busexpress.data.FavouriteBusStopRepository
-import com.example.busexpress.data.SingaporeBusRepository
+import com.example.busexpress.data.*
+import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.screens.AppViewModel
 import kotlinx.coroutines.flow.*
@@ -26,20 +25,75 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
     /**
      *  StateFlows to store the Data of Database
      */
-    var goingOutUiState: StateFlow<FavouriteBusStopList> =
-        favouriteBusStopRepository.retrieveGoingOutFavouriteBusStops().map { FavouriteBusStopList(it) }
+    var allFavouritesUiState: StateFlow<FavouriteBusStopList> =
+        favouriteBusStopRepository.retrieveAllFavouriteBusStops().map { FavouriteBusStopList(it) }
             // Convert Flow into a StateFlow, allowing UI to update itself
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = FavouriteBusStopList()
             )
+    /**
+     *  StateFlows to store the processed data from Database
+     */
+    private val _busStopsInFavUiState = MutableStateFlow(BusStopsInFavourites())
+    val busStopsInFavUiState: StateFlow<BusStopsInFavourites> = _busStopsInFavUiState.asStateFlow()
 
     /**
      * Holds the current Ui State
      */
     var favouriteBusStopUiState by mutableStateOf(FavouriteBusStopUiState())
         private set
+
+    /**
+     * Function to return Favourite buses to the Composable
+     */
+    fun determineOutAndBack(
+        goingOutFavouriteUiState: FavouriteBusStopList,
+        appViewModel: AppViewModel,
+        busStopNameUiState: BusStopValue,
+        busServiceUiState: SingaporeBus,
+    ) {
+        // Retrieve Bus Stops ONCE for Favourites [Both Going Out]
+        val busStopList = goingOutFavouriteUiState.busStopList
+        val busStopListLength = busStopList.size - 1
+        Log.d("DebugTag", "Size of Bus Stop List ${busStopList.size}")
+
+        // 2 Lists each for Going Out and Coming Back
+        val singaporeBusGoingOutList: MutableList<SingaporeBus> = mutableListOf()
+        val singaporeBusComingBackList: MutableList<SingaporeBus> = mutableListOf()
+        val busStopValueGoingOutList: MutableList<BusStopValue> = mutableListOf()
+        val busStopValueComingBackList: MutableList<BusStopValue> = mutableListOf()
+
+        // Determine Bus Details
+        for (index in 0..busStopListLength) {
+            // Retrieve Current Bus Stop
+            val currentBusStop = busStopList[index]?.favouriteBusStopCode
+            // Use Bus Stop Code to get Bus Details and Stuff
+            appViewModel.determineUserQuery(currentBusStop.toString())
+
+            // Save Timings & Details in an array from API Call
+            if (busStopList[index]?.goingOutBusStop == 0) {
+                // Going Out
+                singaporeBusGoingOutList.add(busServiceUiState)
+                busStopValueGoingOutList.add(busStopNameUiState)
+            }
+            else {
+                // Coming Back
+                singaporeBusComingBackList.add(busServiceUiState)
+                busStopValueComingBackList.add(busStopNameUiState)
+            }
+        }
+
+        // Update after the For Loop
+        _busStopsInFavUiState.value = BusStopsInFavourites(
+            singaporeBusComingBackList = singaporeBusComingBackList,
+            singaporeBusGoingOutList = singaporeBusGoingOutList,
+            busStopValueComingBackList = busStopValueComingBackList,
+            busStopValueGoingOutList = busStopValueGoingOutList
+        )
+
+    }
 
     /**
      * Updates the [FavouriteBusStopUiState] with value provided in the argument, while providing validation for the input values
@@ -74,7 +128,7 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
      */
     fun retrieveFavouriteBusStops(goingOut: Boolean) {
         if (goingOut) {
-            goingOutUiState = favouriteBusStopRepository.retrieveGoingOutFavouriteBusStops().map { FavouriteBusStopList(it) }
+            allFavouritesUiState = favouriteBusStopRepository.retrieveGoingOutFavouriteBusStops().map { FavouriteBusStopList(it) }
                 // Convert Flow into a StateFlow, allowing UI to update itself
                 .stateIn(
                     scope = viewModelScope,
@@ -83,7 +137,7 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
                 )
         }
         else {
-            goingOutUiState = favouriteBusStopRepository.retrieveComingBackFavouriteBusStops().map { FavouriteBusStopList(it) }
+            allFavouritesUiState = favouriteBusStopRepository.retrieveComingBackFavouriteBusStops().map { FavouriteBusStopList(it) }
                 // Convert Flow into a StateFlow, allowing UI to update itself
                 .stateIn(
                     scope = viewModelScope,

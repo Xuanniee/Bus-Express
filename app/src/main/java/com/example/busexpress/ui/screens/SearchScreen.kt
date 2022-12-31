@@ -3,7 +3,6 @@ package com.example.busexpress.ui.screens
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,11 +26,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.busexpress.BusExpressScreen
 import com.example.busexpress.R
 import com.example.busexpress.network.*
 import com.example.busexpress.ui.component.BusStopComposable
+import com.example.busexpress.ui.component.MenuSelection
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 
 @Composable
@@ -46,7 +44,8 @@ fun SearchScreen(
     busStopDetails: BusStopValue,
     busServicesRouteList: BusServicesRoute,
     currentScreen: BusExpressScreen,
-    favouriteBusStopViewModel: FavouriteBusStopViewModel
+    favouriteBusStopViewModel: FavouriteBusStopViewModel,
+    menuSelection: MutableState<MenuSelection>,
 ) {
     // Mutable State for User Input
     val userInput = remember {
@@ -86,7 +85,9 @@ fun SearchScreen(
                     busServiceBool = busServiceBool,
                     busServicesRouteList = busServicesRouteList,
                     busRoutes = busRoutes,
-                    favouriteBusStopViewModel = favouriteBusStopViewModel
+                    favouriteBusStopViewModel = favouriteBusStopViewModel,
+                    appViewModel = viewModel,
+                    menuSelection = menuSelection
                 )
             }
             is BusUiState.Loading -> {
@@ -172,6 +173,8 @@ fun ResultScreen(
     busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier,
     favouriteBusStopViewModel: FavouriteBusStopViewModel,
+    appViewModel: AppViewModel,
+    menuSelection: MutableState<MenuSelection>,
 ) = // Results of Search
     if (busServiceBool) {
         // Bus Services
@@ -197,8 +200,8 @@ fun ResultScreen(
         // Mutable State to keep track of which Tab we are at
         var tapRowState by rememberSaveable { mutableStateOf(0) }
         val tapRowTitles = mutableListOf<String>(
-            "${busServicesRouteList.busStopDetailsJSONList[busRouteArray1Length - 1].busStopDescription}",
-            "${busServicesRouteList.busStopDetailsJSONList.last().busStopDescription}"
+            busServicesRouteList.busStopDetailsJSONList[busRouteArray1Length - 1].busStopDescription,
+            busServicesRouteList.busStopDetailsJSONList.last().busStopDescription
         )
 
         // Ensure only 1 Tab if it is a Loop bus, i.e. the Start and End Bus Stop are the same
@@ -247,7 +250,9 @@ fun ResultScreen(
                             busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
                             busServiceBool = busServiceBool,
                             modifier = modifier,
-                            favouriteViewModel = favouriteBusStopViewModel
+                            favouriteViewModel = favouriteBusStopViewModel,
+                            appViewModel = appViewModel,
+                            menuSelection = menuSelection
                         )
 
                         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -268,7 +273,9 @@ fun ResultScreen(
                             busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index+busRouteArray1Length],
                             busServiceBool = busServiceBool,
                             modifier = modifier,
-                            favouriteViewModel = favouriteBusStopViewModel
+                            favouriteViewModel = favouriteBusStopViewModel,
+                            appViewModel = appViewModel,
+                            menuSelection = menuSelection
                         )
 
                         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -306,6 +313,8 @@ fun ResultScreen(
             modifier = modifier,
             busServiceBool = busServiceBool,
             favouriteViewModel = favouriteBusStopViewModel,
+            appViewModel = appViewModel,
+            menuSelection = menuSelection
         )
 
         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))

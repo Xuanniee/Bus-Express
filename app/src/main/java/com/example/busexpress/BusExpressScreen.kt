@@ -8,10 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.twotone.Email
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,10 +19,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.busexpress.data.FavouriteBusStopList
 import com.example.busexpress.network.BusRoutes
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.network.UserInputResult
+import com.example.busexpress.ui.component.MenuSelection
+import com.example.busexpress.ui.component.NestedMenuSelection
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
@@ -86,7 +86,12 @@ fun BusExpressNavigationDrawer(
     modifier: Modifier = Modifier,
     scope: CoroutineScope,
     navController: NavHostController,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
+    favouriteBusStopViewModel: FavouriteBusStopViewModel,
+    goingOutFavouriteUiState: FavouriteBusStopList,
+    appViewModel: AppViewModel,
+    busStopNameUiState: BusStopValue,
+    busServiceUiState: SingaporeBus,
 ) {
     Column(
         modifier = modifier
@@ -191,6 +196,12 @@ fun BusExpressNavigationDrawer(
         // Favourites
         Button(
             onClick = {
+                favouriteBusStopViewModel.determineOutAndBack(
+                    goingOutFavouriteUiState = goingOutFavouriteUiState,
+                    appViewModel = appViewModel,
+                    busServiceUiState = busServiceUiState,
+                    busStopNameUiState = busStopNameUiState,
+                )
                 navController.navigate(BusExpressScreen.FavouritesAway.name)
                 scope.launch { scaffoldState.drawerState.close() }
             },
@@ -243,7 +254,7 @@ fun BusExpressNavigationDrawer(
 fun BusExpressApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    viewModel: AppViewModel = viewModel(),
+    appViewModel: AppViewModel = viewModel(),
     favouriteBusStopViewModel: FavouriteBusStopViewModel = viewModel(),
 ) {
     // Save Current Back Stack Entry
@@ -253,6 +264,15 @@ fun BusExpressApp(
         backStackEntry?.destination?.route ?: BusExpressScreen.Default.name
     )
     val scaffoldState = rememberScaffoldState()
+
+    // Holding the API Call Data here is better so I can pass it to multiple screens
+    val busServiceUiState by appViewModel.busServiceUiState.collectAsState()
+    val busStopNameUiState by appViewModel.busStopNameUiState.collectAsState()
+    val busRouteUiState by appViewModel.busRouteUiState.collectAsState()
+    val multipleBusUiState by appViewModel.multipleBusUiState.collectAsState()
+    val busStopsInFavourites by favouriteBusStopViewModel.busStopsInFavUiState.collectAsState()
+    val goingOutUiState by favouriteBusStopViewModel.allFavouritesUiState.collectAsState()
+
     val scope = rememberCoroutineScope()
 
     // Top Navigation Bar
@@ -264,7 +284,12 @@ fun BusExpressApp(
             BusExpressNavigationDrawer(
                 navController = navController,
                 scope = scope,
-                scaffoldState = scaffoldState
+                scaffoldState = scaffoldState,
+                favouriteBusStopViewModel = favouriteBusStopViewModel,
+                appViewModel = appViewModel,
+                busStopNameUiState = busStopNameUiState,
+                busServiceUiState = busServiceUiState,
+                goingOutFavouriteUiState = goingOutUiState
             )
         },
         drawerElevation = 20.dp,
@@ -278,17 +303,11 @@ fun BusExpressApp(
             )
         }
     ) { innerPadding ->
-        // Holding the API Call Data here is better so I can pass it to multiple screens
-        val busServiceUiState by viewModel.busServiceUiState.collectAsState()
-        val busStopNameUiState by viewModel.busStopNameUiState.collectAsState()
-        val busRouteUiState by viewModel.busRouteUiState.collectAsState()
-        val multipleBusUiState by viewModel.multipleBusUiState.collectAsState()
-//        val multipleBusStopNameUiState by viewModel.multipleBusStopNameUiState.collectAsState()
-
-//        val favouriteBusStopUiState = favouriteViewModel.favouriteBusStopUiState
+        // For Small Menu Popup
+        val menuSelection = remember { mutableStateOf(MenuSelection.NONE) }
 
         // State Variables
-        val busServiceBoolUiState = viewModel.busServiceBoolUiState
+        val busServiceBoolUiState = appViewModel.busServiceBoolUiState
         Log.d("debug1", "$busServiceBoolUiState")
 
         // NavHost Composable for Navigating between Screens
@@ -307,7 +326,7 @@ fun BusExpressApp(
             // 2. Search Screen
             composable(route = BusExpressScreen.Search.name) {
                 SearchScreen(
-                    busUiState = viewModel.busUiState,
+                    busUiState = appViewModel.busUiState,
                     busArrivalsJson = SingaporeBus(
                         metaData = busServiceUiState.metaData,
                         busStopCode = busServiceUiState.busStopCode,
@@ -325,24 +344,26 @@ fun BusExpressApp(
                         busRouteArray = busRouteUiState.busRouteArray
                     ),
                     busServiceBool = busServiceBoolUiState,
-                    viewModel = viewModel,
+                    viewModel = appViewModel,
                     busServicesRouteList = multipleBusUiState,
                     currentScreen = currentScreen,
                     favouriteBusStopViewModel = favouriteBusStopViewModel,
+                    menuSelection = menuSelection,
                 )
             }
 
             // 3. Nearby Screen
             composable(route = BusExpressScreen.Nearby.name) {
-                NearbyScreen()
+                NearbyScreen(
+                )
             }
 
             // 3. Favourites [Going Out]
             composable(route = BusExpressScreen.FavouritesAway.name) {
                 FavouritesScreen(
-                    viewModel = viewModel,
-                    busServicesRouteList = multipleBusUiState,
                     favouriteBusStopViewModel = favouriteBusStopViewModel,
+                    appViewModel = appViewModel,
+                    busStopsInFavourites = busStopsInFavourites,
                 )
             }
 

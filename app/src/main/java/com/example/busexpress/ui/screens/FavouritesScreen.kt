@@ -1,6 +1,7 @@
 package com.example.busexpress.ui.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,24 +15,43 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.busexpress.data.BusStopsInFavourites
 import com.example.busexpress.data.FavouriteBusStop
+import com.example.busexpress.data.FavouriteBusStopList
 import com.example.busexpress.network.BusServicesRoute
+import com.example.busexpress.network.BusStopValue
+import com.example.busexpress.network.SingaporeBus
+import com.example.busexpress.network.SingaporeBusServices
 import com.example.busexpress.ui.component.BusStopComposable
+import com.example.busexpress.ui.component.MenuSelection
+import com.example.busexpress.ui.component.NestedMenuSelection
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import kotlinx.coroutines.launch
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun FavouritesScreen(
     favouriteBusStopViewModel: FavouriteBusStopViewModel,
-    viewModel: AppViewModel,
-    busServicesRouteList: BusServicesRoute,
-    modifier: Modifier = Modifier
+    appViewModel: AppViewModel,
+    busStopsInFavourites: BusStopsInFavourites,
+    modifier: Modifier = Modifier,
 ) {
     // Variable to remember Tab Row
     var tapRowState by rememberSaveable { mutableStateOf(0) }
     val tapRowTitles = listOf("Going Out", "Coming Back")
-    val goingOutFavouriteUiState by favouriteBusStopViewModel.goingOutUiState.collectAsState()
+
+    // Menu
+    val menuSelection = remember { mutableStateOf(MenuSelection.NONE) }
+
+    val singaporeBusGoingOutList = busStopsInFavourites.singaporeBusGoingOutList
+    val singaporeBusComingBackList = busStopsInFavourites.singaporeBusComingBackList
+    val busStopValueGoingOutList = busStopsInFavourites.busStopValueGoingOutList
+    val busStopValueComingBackList = busStopsInFavourites.busStopValueComingBackList
+    Log.d("Favourites", singaporeBusGoingOutList.toString())
+
+    val goingOutLength = singaporeBusGoingOutList.size - 1
+    val comingBackLength = singaporeBusComingBackList.size - 1
 
     Column() {
         // Navigation Bar for Going Out & Coming Back
@@ -53,46 +73,56 @@ fun FavouritesScreen(
         }
 
         if (tapRowState == 0) {
-            // Call Function to get Favourites
-            favouriteBusStopViewModel.retrieveFavouriteBusStops(true)
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(all = 10.dp)
+            ) {
+                for (index in 0..goingOutLength) {
+                    // UI Layer
+                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+
+                    BusStopComposable(
+                        busArrivalsJSON = singaporeBusGoingOutList[index],
+                        busStopDetailsJSON = busStopValueGoingOutList[index],
+                        busServiceBool = false,
+                        modifier = modifier,
+                        favouriteViewModel = favouriteBusStopViewModel,
+                        appViewModel = appViewModel,
+                        menuSelection = menuSelection
+                    )
+
+                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                }
             }
-        else if (tapRowState == 1) {
-            favouriteBusStopViewModel.retrieveFavouriteBusStops(false)
         }
-        // Retrieve Bus Stops
-        val busStopList = goingOutFavouriteUiState.busStopList
-        val busStopListLength = busStopList.size
+        // Coming Back [Favourites]
+        else if (tapRowState == 1) {
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(all = 10.dp)
+            ) {
+                for (index in 0..comingBackLength) {
+                    // UI Layer
+                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
 
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(all = 10.dp)
-        ) {
-            items(busStopListLength) { index ->
-                // Retrieve Current Bus Stop
-                val currentBusStop = busStopList[index]?.favouriteBusStopCode
-                // Use Bus Stop Code to get Bus Details and Stuff
-                viewModel.determineUserQuery(currentBusStop.toString())
+                    BusStopComposable(
+                        busArrivalsJSON = singaporeBusComingBackList[index],
+                        busStopDetailsJSON = busStopValueComingBackList[index],
+                        busServiceBool = false,
+                        modifier = modifier,
+                        favouriteViewModel = favouriteBusStopViewModel,
+                        appViewModel = appViewModel,
+                        menuSelection = menuSelection
+                    )
 
-                // UI Layer
-                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
-
-                BusStopComposable(
-                    busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
-                    busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
-                    busServiceBool = false,
-                    modifier = modifier,
-                    favouriteViewModel = favouriteBusStopViewModel
-                )
-
-                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                }
             }
         }
     }
 }
-
-
-
 
 
 

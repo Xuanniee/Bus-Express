@@ -27,4 +27,6 @@
     <string name="bus_composable_menu_desc">Additional Menu Options</string>
     <string name="search_loading_screen_desc">Your search results will appear here!!</string>
     <string name="search_nav_desc">Search</string>
+    <string name="searchbar_redirect_content_desc">Click to Search for Buses</string>
+    <string name="tutorial_default_desc">Thank you for using Bus Express SG!!! Click on the search bar on top to begin searching for a bus stop or bus service number. You can navigate the application using the sidebar.</string>
 </resources>

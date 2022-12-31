@@ -6,7 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -16,11 +19,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.busexpress.R
 import com.example.busexpress.network.*
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
-import kotlinx.coroutines.coroutineScope
+import com.example.busexpress.ui.screens.AppViewModel
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
@@ -33,17 +35,13 @@ fun BusStopComposable(
     busStopDetailsJSON: BusStopValue,
     busServiceBool: Boolean,
     favouriteViewModel: FavouriteBusStopViewModel,
+    appViewModel: AppViewModel,
+    menuSelection: MutableState<MenuSelection>,
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
     val currentBusStopCode: String = busArrivalsJSON.busStopCode
     val currentBusStopServices: List<SingaporeBusServices> = busArrivalsJSON.services
-
-    // Favourite Button Details
-    val coroutineScope = rememberCoroutineScope()
-
-    // Bus Route Details
-//    val busRouteArray: List<BusStopInRoute> = busRoutes.busRouteArray
 
     // Store the Variable State if Bus is Expanded
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -81,18 +79,10 @@ fun BusStopComposable(
 
             // Button to add Bus Stop to Favourites
             if (!expanded) {
-                BusComposableMenuButton (
-                    onClick = {
-                        coroutineScope.launch {
-                            // Update the favouriteUiState to hold the current BusStopCode
-                            favouriteViewModel.updateFavouriteUiState(favouriteBusStopCode = currentBusStopCode, goingOut = 0)
-
-                            // Save it in the Database
-                            favouriteViewModel.saveBusStop()
-
-                        }
-                        // TODO Menu Button
-                    }
+                BusComposableDropDownMenu(
+                    menuSelection = menuSelection,
+                    favouriteViewModel = favouriteViewModel,
+                    currentBusStopCode = currentBusStopCode
                 )
             }
             // Refresh Icon
