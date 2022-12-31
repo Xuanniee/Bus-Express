@@ -271,7 +271,7 @@ fun BusExpressApp(
     val busRouteUiState by appViewModel.busRouteUiState.collectAsState()
     val multipleBusUiState by appViewModel.multipleBusUiState.collectAsState()
     val busStopsInFavourites by favouriteBusStopViewModel.busStopsInFavUiState.collectAsState()
-    val goingOutUiState by favouriteBusStopViewModel.allFavouritesUiState.collectAsState()
+    val allFavouritesUiState by favouriteBusStopViewModel.allFavouritesUiState.collectAsState()
 
     val scope = rememberCoroutineScope()
 
@@ -289,7 +289,7 @@ fun BusExpressApp(
                 appViewModel = appViewModel,
                 busStopNameUiState = busStopNameUiState,
                 busServiceUiState = busServiceUiState,
-                goingOutFavouriteUiState = goingOutUiState
+                goingOutFavouriteUiState = allFavouritesUiState
             )
         },
         drawerElevation = 20.dp,

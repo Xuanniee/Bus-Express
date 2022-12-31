@@ -32,6 +32,7 @@ import com.example.busexpress.network.*
 import com.example.busexpress.ui.component.BusStopComposable
 import com.example.busexpress.ui.component.MenuSelection
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchScreen(
@@ -53,6 +54,7 @@ fun SearchScreen(
     }
     // Focus Manager
     val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
@@ -68,8 +70,10 @@ fun SearchScreen(
                 imeAction = ImeAction.Search
             ),
             onKeyboardSearch = {
-                // Provide Search Feature based on Bus Stop Code or Bus Service Number
-                viewModel.determineUserQuery(userInput = userInput.value.text)
+                coroutineScope.launch {
+                    // Provide Search Feature based on Bus Stop Code or Bus Service Number
+                    viewModel.determineUserQuery(userInput = userInput.value.text)
+                }
 
                 // Close the Onscreen Keyboard
                 focusManager.clearFocus(true)

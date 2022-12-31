@@ -1,11 +1,8 @@
 package com.example.busexpress.ui.favouriteBusStops
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -16,8 +13,14 @@ import com.example.busexpress.data.*
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.ui.screens.AppViewModel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
+/**
+ * Basically, what I need to do is code such that the viewModels do not rely on each other functions
+ */
 /**
  * View Model to validate and insert items in the Room database.
  */
@@ -57,7 +60,7 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
         // Retrieve Bus Stops ONCE for Favourites [Both Going Out]
         val busStopList = goingOutFavouriteUiState.busStopList
         val busStopListLength = busStopList.size - 1
-        Log.d("DebugTag", "Size of Bus Stop List ${busStopList.size}")
+        Log.d("DebugTag", "Size of Bus Stop List $busStopList")
 
         // 2 Lists each for Going Out and Coming Back
         val singaporeBusGoingOutList: MutableList<SingaporeBus> = mutableListOf()
@@ -69,6 +72,7 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
         for (index in 0..busStopListLength) {
             // Retrieve Current Bus Stop
             val currentBusStop = busStopList[index]?.favouriteBusStopCode
+            Log.d("DebugTag", "Current Busstop $currentBusStop")
             // Use Bus Stop Code to get Bus Details and Stuff
             appViewModel.determineUserQuery(currentBusStop.toString())
 
@@ -76,7 +80,9 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
             if (busStopList[index]?.goingOutBusStop == 0) {
                 // Going Out
                 singaporeBusGoingOutList.add(busServiceUiState)
+                Log.d("DebugTag", busServiceUiState.toString())
                 busStopValueGoingOutList.add(busStopNameUiState)
+                Log.d("DebugTag", busServiceUiState.toString())
             }
             else {
                 // Coming Back

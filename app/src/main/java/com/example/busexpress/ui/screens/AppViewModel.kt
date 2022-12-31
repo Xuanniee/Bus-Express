@@ -1,5 +1,6 @@
 package com.example.busexpress.ui.screens
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -71,7 +72,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     /**
      *  Function to get Bus Timings depending on Bus Service No. or Bus Stop Code
      */
-    fun determineUserQuery(userInput: String) {
+     fun determineUserQuery(userInput: String) {
         // Determine if User Provided a Bus Service No. or Bus Stop Code
         val userInputResult = determineBusServiceorStop(userInput)
         viewModelScope.launch {
@@ -91,6 +92,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                 getBusStopNames(targetBusStopCode = userInputResult.busStopCode?.toInt())
                 getBusTimings(userInput = userInputResult.busStopCode)
             }
+            Log.d("DebugTag","HERE!!!")
         }
     }
 

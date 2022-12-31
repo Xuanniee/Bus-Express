@@ -48,7 +48,7 @@ fun FavouritesScreen(
     val singaporeBusComingBackList = busStopsInFavourites.singaporeBusComingBackList
     val busStopValueGoingOutList = busStopsInFavourites.busStopValueGoingOutList
     val busStopValueComingBackList = busStopsInFavourites.busStopValueComingBackList
-    Log.d("Favourites", singaporeBusGoingOutList.toString())
+    Log.d("Favourites", busStopsInFavourites.toString())
 
     val goingOutLength = singaporeBusGoingOutList.size - 1
     val comingBackLength = singaporeBusComingBackList.size - 1
