@@ -1,4 +1,6 @@
 # Bus Express [Android - Kotlins & Jetpack Compose]
+#### Video Demo:  https://youtu.be/eIcMZXwWiK0
+#### Description: As shown in rest of README.md
 
 ## Project Description
 
