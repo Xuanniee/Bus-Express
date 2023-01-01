@@ -9,19 +9,25 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    namespace 'com.example.busexpress'
+    namespace 'com.xuannie.busexpress'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.busexpress"
+        applicationId "com.xuannie.busexpress"
         minSdk 26
         targetSdk 33
-        versionCode 1
+        versionCode 3
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
+        }
+    }
+
+    bundle {
+        storeArchive {
+            enable = false
         }
     }
 
