@@ -1,26 +1,29 @@
 # Bus Express [Android]
----
 
 ## Project Description
----
 
-<img src="AppImages/Homepage.png" alt="Homepage" width="50%">
+<img src="AppImages/Homepage.png" alt="Homepage" width="30%">
 **Bus Express** is a simple, no-frills application that allows users to query details about incoming buses in Singapore by using LTA Datamall's API. The Privacy Policy can be found at the bottom for your persual. A quick guide is also written on the front page of the app.
+
 The application is hosted in the Google Play Store, and can be found here:
 
 ## Content
----
 
-1. Queries for the arrival timings, alongside a few metadata information about the incoming 3 buses.
-<img src="AppImages/UnexpandedSearchResults.png" alt="Unexpanded Search Results" width="50%">
+#### 1. Queries for the arrival timings, alongside a few metadata information about the incoming 3 buses.
+<img src="AppImages/UnexpandedSearchResults.png" alt="Unexpanded Search Results" width="30%">
 
 By providing the bus stop code, which uniquely identifies all the bus stops in Singapore, Bus Express is able to return the desired bus stop as shown above. 
+
 By clicking the left icon, the user retrieves all the necessary information about incoming buses as shown below.
+
 By clicking the right icon, the user can choose to add this particular bus stop into their favourites list.
 
-<img src="AppImages/SearchResults.png" alt="Search Results" width="50%">
+<img src="AppImages/SearchResults.png" alt="Search Results" width="30%">
 
-As the picture shows, the user is provided all the bus services that passes by the requested bus stop. They can then see the estimated arrival timings, in minutes, of the next three buses. In addition, users will know the type of bus that is coming, such as a bendy or a double decker bus. The wheelchair icon tells users if the incoming bus is wheelchair accessible, as not all bus models have this capability.
+As the picture shows, the user is provided all the bus services that passes by the requested bus stop. 
+
+They can then see the estimated arrival timings, in minutes, of the next three buses. In addition, users will know the type of bus that is coming, such as a bendy or a double decker bus. The wheelchair icon tells users if the incoming bus is wheelchair accessible, as not all bus models have this capability.
+
 The coloured bar below provides a visual representation of the occupancy rates of the buses, with 3 possible states:
 * Green - Seating is available
 * Orange - Standing space is available
@@ -28,27 +31,32 @@ The coloured bar below provides a visual representation of the occupancy rates o
 
 The right icon has also changed from a "More Options" icon to a "Refresh" icon, allowing users to update the timings for that particular bus stop.
 
-2. Adding the frequently accessed bus stops to your favourites list.
-<img src="AppImages/AddFavourites.png" alt="Adding to Favourites" width="50%">
+#### 2. Adding the frequently accessed bus stops to your favourites list.
+<img src="AppImages/AddFavourites.png" alt="Adding to Favourites" width="30%">
 
-As mentioned earlier, clicking the "More Options" icon would allow users to add the bus stop to their favourites list. Users are provided with 2 options as shown, either "Going Out" or "Coming Back". Regardless of the option chosen, the bus stop will be added to their favourites. The difference is your favourites list can be divided into 2, allowing you to put the bus stops that matches your journey into 1 of the 2, making it more accessible and convenient to locate bus stops.
+As mentioned earlier, clicking the "More Options" icon would allow users to add the bus stop to their favourites list. Users are provided with 2 options as shown, either "Going Out" or "Coming Back". 
+Regardless of the option chosen, the bus stop will be added to their favourites. 
+The difference is your favourites list can be divided into 2, allowing you to put the bus stops that matches your journey into 1 of the 2, making it more accessible and convenient to locate bus stops.
 
-<img src="AppImages/Favourites.png" alt="Favourites List" width="50%">
+<img src="AppImages/Favourites.png" alt="Favourites List" width="30%">
 
 After adding a bus stop to your favourites, users can navigate to them using the left navigation bar. They can click the 2 tabs on top to decide which favourites list they wish to access. As you can see, clicking any of the bus stops in your favourites will retrieve the same information as before.
 
-3. Retrieving the bus routes of any bus service number.
-<img src="AppImages/BusRouteTimings.png" alt="BusRouteTimings" width="50%">
+#### 3. Retrieving the bus routes of any bus service number.
+<img src="AppImages/BusRouteTimings.png" alt="BusRouteTimings" width="30%">
 
-Alternatively, users may choose to provide a bus service number instead of the bus stop code. This would return the bus route, which is a list of all the bus stops that this particular bus service would travel to. Clicking any of the bus stops in the route would also yield the same information as mentioned. There are also 2 tabs at the top, which represents the 2 possible direction a bus service will travel in. Switch between the 2 tabs to find your bus stop. If the bus service is a loop like 962, there will only be 1 tab on top.
+Alternatively, users may choose to provide a bus service number instead of the bus stop code. This would return the bus route, which is a list of all the bus stops that this particular bus service would travel to. 
+Clicking any of the bus stops in the route would also yield the same information as mentioned. There are also 2 tabs at the top, which represents the 2 possible direction a bus service will travel in. Switch between the 2 tabs to find your bus stop. If the bus service is a loop like 962, there will only be 1 tab on top.
 
 4. Dark Mode
-<img src="AppImages/DarkMode.png" alt="Dark Mode" width="50%">
+<img src="AppImages/DarkMode.png" alt="Dark Mode" width="30%">
 
-Although dark mode has been implemented on the application, it is still very rough around the edges as the color contrast for certain composables like icons are bad. There is also no dedicated button to switch between the 2 themes currently. This means that the application will simply follow the theme of your phone. If your phone is in dark mode, it will be launched in the dark mode and vice versa.
+Although dark mode has been implemented on the application, it is still very rough around the edges as the color contrast for certain composables like icons are bad. There is also no dedicated button to switch between the 2 themes currently.
+
+This means that the application will simply follow the theme of your phone. If your phone is in dark mode, it will be launched in the dark mode and vice versa.
 
 5. Navigation
-<img src="AppImages/Navigation.png" alt="Navigation" width="50%">
+<img src="AppImages/Navigation.png" alt="Navigation" width="30%">
 
 Users can navigate between the various screens of the application by making use of the sidebar.
 
