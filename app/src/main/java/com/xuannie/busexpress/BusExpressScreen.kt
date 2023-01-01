@@ -135,11 +135,11 @@ fun BusExpressNavigationDrawer(
             )
         )
 
-        Text(
-            text = stringResource(R.string.navigation_flavor_text),
-            style = MaterialTheme.typography.body2,
-            modifier = modifier.padding(5.dp)
-        )
+//        Text(
+//            text = stringResource(R.string.navigation_flavor_text),
+//            style = MaterialTheme.typography.body2,
+//            modifier = modifier.padding(5.dp)
+//        )
 
         Spacer(modifier = Modifier.height(5.dp))
 
