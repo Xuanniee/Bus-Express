@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Bus Express</string>
-    <string name="favourites_away">Going Out [Favourites]</string>
-    <string name="favourites_back">Coming Back [Favourites]</string>
+    <string name="favourites">Favourites</string>
     <string name="nearby">Nearby</string>
     <string name="navbar_description">Main Navigation Menu</string>
     <string name="dark_mode_description">Dark Mode</string>
@@ -28,5 +27,6 @@
     <string name="search_loading_screen_desc">Your search results will appear here!!</string>
     <string name="search_nav_desc">Search</string>
     <string name="searchbar_redirect_content_desc">Click to Search for Buses</string>
-    <string name="tutorial_default_desc">Thank you for using Bus Express SG!!! Click on the search bar on top to begin searching for a bus stop or bus service number. You can navigate the application using the sidebar.</string>
+    <string name="tutorial_default_desc">\u2022 Click on the search bar on top to begin searching for a bus stop or bus service number.\n \u2022 You can navigate the application using the sidebar.</string>
+    <string name="default_screen_greetings">Thank you for using Bus Express SG!!!</string>
 </resources>

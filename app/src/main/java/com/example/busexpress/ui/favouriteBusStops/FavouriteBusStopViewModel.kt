@@ -10,10 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
-import com.example.busexpress.data.BusStopsInFavourites
-import com.example.busexpress.data.FavouriteBusStopList
-import com.example.busexpress.data.FavouriteBusStopRepository
-import com.example.busexpress.data.SingaporeBusRepository
+import com.example.busexpress.data.*
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import kotlinx.coroutines.flow.*
@@ -27,7 +24,7 @@ import java.io.IOException
 /**
  * View Model to validate and insert items in the Room database.
  */
-class FavouriteBusStopViewModel(private val favouriteBusStopRepository: FavouriteBusStopRepository, private val singaporeBusRepository: SingaporeBusRepository): ViewModel() {
+class FavouriteBusStopViewModel(private val favouriteBusStopRepository: FavouriteBusStopRepository): ViewModel() {
     /**
      *  StateFlows to store the Data of Database
      */
@@ -49,12 +46,12 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
      *  StateFlows to store the Data of API Calls
      */
     private val _favTimingUiState = MutableStateFlow(SingaporeBus())
-    val favTimingUiState: StateFlow<SingaporeBus> = _favTimingUiState.asStateFlow()
+//    val favTimingUiState: StateFlow<SingaporeBus> = _favTimingUiState.asStateFlow()
 
     private val _favDetailsUiState = MutableStateFlow(BusStopValue())
-    val favDetailUiState: StateFlow<BusStopValue> = _favDetailsUiState.asStateFlow()
+//    val favDetailUiState: StateFlow<BusStopValue> = _favDetailsUiState.asStateFlow()
 
-    var favouritesUiState: FavouriteDetailsUiState by mutableStateOf(FavouriteDetailsUiState.Loading)
+    private var favouritesUiState: FavouriteDetailsUiState by mutableStateOf(FavouriteDetailsUiState.Loading)
 
 
     /**
@@ -84,24 +81,22 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
             for (index in 0..busStopListLength) {
                 // Retrieve Current Bus Stop
                 val currentBusStop = busStopList[index]?.favouriteBusStopCode
-                Log.d("DebugTag", "Current Busstop $currentBusStop")
 
                 // Use Bus Stop Code to get Bus Details and Stuff
                 getFavouriteTimeAndDetails(targetBusStopCode = currentBusStop?.toInt())
-                Log.d("DebugTag", "CAME OUT!!!!")
 
                 // Save Timings & Details in an array from API Call
                 if (busStopList[index]?.goingOutBusStop == 0) {
                     // Going Out
                     singaporeBusGoingOutList.add(_favTimingUiState.value)
-                    Log.d("DebugTag", _favTimingUiState.value.toString())
                     busStopValueGoingOutList.add(_favDetailsUiState.value)
-                    Log.d("DebugTag", _favDetailsUiState.value.toString())
                 }
                 else {
                     // Coming Back
                     singaporeBusComingBackList.add(_favTimingUiState.value)
+                    Log.d("DebugTag", _favTimingUiState.value.toString())
                     busStopValueComingBackList.add(_favDetailsUiState.value)
+                    Log.d("DebugTag", _favDetailsUiState.value.toString())
                 }
             }
 
@@ -181,17 +176,13 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
                     latitude = targetBusStop.latitude,
                     longitude = targetBusStop.longitude
                 )
-                Log.d("DebugTag", "INSIDE FUNTION I NEED: ${_favDetailsUiState.value.toString()}")
             }
-            Log.d("Debug2", "Secret error")
             FavouriteDetailsUiState.Success(targetBusStop.busStopRoadName)
         }
         catch (e: IOException) {
-            Log.d("Debug2", "IOException error")
             FavouriteDetailsUiState.Error
         }
         catch (e: HttpException) {
-            Log.d("Debug2", "HTTP error")
             FavouriteDetailsUiState.Error
         }
     }
@@ -220,7 +211,11 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
         // Check if Valid
         if (favouriteBusStopUiState.isValid()) {
             // Pass the Object Bus Stop to be inserted
-            favouriteBusStopRepository.insertBusStop(favouriteBusStop = favouriteBusStopUiState.toFavouriteBusStop())
+            Log.d("DebugTag3", favouriteBusStopUiState.toString())
+            favouriteBusStopRepository.insertBusStop(favouriteBusStop = FavouriteBusStop(
+                favouriteBusStopCode = favouriteBusStopUiState.favouriteBusStopCode,
+                goingOutBusStop = favouriteBusStopUiState.goingOutBusStop
+            ))
         }
     }
 
@@ -258,10 +253,8 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
             initializer {
                 val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BusExpressApplication)
                 val favouriteBusStopRepository = application.container.favouriteBusStopRepository
-                val busRepository = application.container.singaporeBusRepository
                 FavouriteBusStopViewModel(
                     favouriteBusStopRepository = favouriteBusStopRepository,
-                    singaporeBusRepository = busRepository
                 )
             }
         }

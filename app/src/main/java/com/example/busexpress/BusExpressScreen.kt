@@ -1,6 +1,5 @@
 package com.example.busexpress
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -25,7 +24,6 @@ import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
 import com.example.busexpress.network.UserInputResult
 import com.example.busexpress.ui.component.MenuSelection
-import com.example.busexpress.ui.component.NestedMenuSelection
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import com.example.busexpress.ui.screens.*
 import com.example.busexpress.ui.theme.Grey900
@@ -36,8 +34,7 @@ import kotlinx.coroutines.launch
 // Enum Class for App Routes
 enum class BusExpressScreen(@StringRes val title: Int) {
     Default(title = R.string.app_name),
-    FavouritesAway(title = R.string.favourites_away),
-    FavouritesBack(title = R.string.favourites_back),
+    Favourites(title = R.string.favourites),
     Nearby(title = R.string.nearby),
     Search(title = R.string.search)
 }
@@ -89,9 +86,6 @@ fun BusExpressNavigationDrawer(
     scaffoldState: ScaffoldState,
     favouriteBusStopViewModel: FavouriteBusStopViewModel,
     goingOutFavouriteUiState: FavouriteBusStopList,
-    appViewModel: AppViewModel,
-    busStopNameUiState: BusStopValue,
-    busServiceUiState: SingaporeBus,
 ) {
     Column(
         modifier = modifier
@@ -199,7 +193,7 @@ fun BusExpressNavigationDrawer(
                 favouriteBusStopViewModel.determineOutAndBack(
                     goingOutFavouriteUiState = goingOutFavouriteUiState,
                 )
-                navController.navigate(BusExpressScreen.FavouritesAway.name)
+                navController.navigate(BusExpressScreen.Favourites.name)
                 scope.launch { scaffoldState.drawerState.close() }
             },
             modifier = modifier
@@ -283,9 +277,6 @@ fun BusExpressApp(
                 scope = scope,
                 scaffoldState = scaffoldState,
                 favouriteBusStopViewModel = favouriteBusStopViewModel,
-                appViewModel = appViewModel,
-                busStopNameUiState = busStopNameUiState,
-                busServiceUiState = busServiceUiState,
                 goingOutFavouriteUiState = allFavouritesUiState
             )
         },
@@ -305,7 +296,6 @@ fun BusExpressApp(
 
         // State Variables
         val busServiceBoolUiState = appViewModel.busServiceBoolUiState
-        Log.d("debug1", "$busServiceBoolUiState")
 
         // NavHost Composable for Navigating between Screens
         NavHost(
@@ -356,18 +346,18 @@ fun BusExpressApp(
             }
 
             // 3. Favourites [Going Out]
-            composable(route = BusExpressScreen.FavouritesAway.name) {
+            composable(route = BusExpressScreen.Favourites.name) {
                 FavouritesScreen(
                     favouriteBusStopViewModel = favouriteBusStopViewModel,
-                    appViewModel = appViewModel,
                     busStopsInFavourites = busStopsInFavourites,
+                    appViewModel = appViewModel
                 )
             }
 
-            // 4. Favourites [Coming Back]
-            composable(route = BusExpressScreen.FavouritesBack.name) {
-                FavouritesComingBackScreen()
-            }
+//            // 4. Favourites [Coming Back]
+//            composable(route = BusExpressScreen.Favourites.name) {
+//                FavouritesComingBackScreen()
+//            }
 
             // 5. Search Results
 

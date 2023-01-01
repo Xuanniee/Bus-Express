@@ -14,24 +14,20 @@ import kotlinx.coroutines.launch
 /**
  * Composable Functions for User to edit the favourite bus stop
  */
-@Composable
-fun EditFavouriteBusStop() {
-
-}
+//@Composable
+//fun EditFavouriteBusStop() {
+//
+//}
 
 enum class MenuSelection {
-    ABOUT,
-    SETTINGS,
-    FAVOURITESOUT,
-    FAVOURITESBACK,
-    NESTED,
+    FAVOURITIESOUT,
+    FAVOURITIESBACK,
     NONE,
 }
 
 enum class NestedMenuSelection {
     FIRST,
     SECOND,
-    DEFAULT
 }
 
 @Composable
@@ -124,7 +120,7 @@ fun MainMenu(
 
                 // Close Menu after Clicking
                 expandedMain.value = false
-                menuSelection.value = MenuSelection.FAVOURITESOUT
+                menuSelection.value = MenuSelection.FAVOURITIESOUT
             }
         ) {
             Text("Add to Favourites [Going Out]")
@@ -143,7 +139,7 @@ fun MainMenu(
 
                 // Close Menu after Clicking
                 expandedMain.value = false
-                menuSelection.value = MenuSelection.FAVOURITESBACK
+                menuSelection.value = MenuSelection.FAVOURITIESBACK
             }
         ) {
             Text("Add to Favourites [Coming Back]")

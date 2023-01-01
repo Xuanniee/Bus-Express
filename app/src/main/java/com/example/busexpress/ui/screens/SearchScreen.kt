@@ -1,6 +1,5 @@
 package com.example.busexpress.ui.screens
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -91,7 +90,7 @@ fun SearchScreen(
                     busRoutes = busRoutes,
                     favouriteBusStopViewModel = favouriteBusStopViewModel,
                     appViewModel = viewModel,
-                    menuSelection = menuSelection
+                    menuSelection = menuSelection,
                 )
             }
             is BusUiState.Loading -> {
@@ -177,15 +176,15 @@ fun ResultScreen(
     busServicesRouteList: BusServicesRoute,
     modifier: Modifier = Modifier,
     favouriteBusStopViewModel: FavouriteBusStopViewModel,
-    appViewModel: AppViewModel,
     menuSelection: MutableState<MenuSelection>,
-) = // Results of Search
+    appViewModel: AppViewModel
+) {
+    // Results of Search
     if (busServiceBool) {
         // Bus Services
         val busRouteArray = busRoutes.busRouteArray
         val busRouteArrayLength = busRouteArray.size
         val busRouteArrayMaxIndex = busRouteArrayLength - 1
-        Log.d("debugTag", "Bus Route Array Size is $busRouteArrayLength")
 
         // Store the Routes in 2 Arrays
         val busRouteArray1 = mutableListOf<BusStopInRoute>()
@@ -255,8 +254,8 @@ fun ResultScreen(
                             busServiceBool = busServiceBool,
                             modifier = modifier,
                             favouriteViewModel = favouriteBusStopViewModel,
-                            appViewModel = appViewModel,
-                            menuSelection = menuSelection
+                            menuSelection = menuSelection,
+                            appViewModel = appViewModel
                         )
 
                         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -278,8 +277,8 @@ fun ResultScreen(
                             busServiceBool = busServiceBool,
                             modifier = modifier,
                             favouriteViewModel = favouriteBusStopViewModel,
-                            appViewModel = appViewModel,
-                            menuSelection = menuSelection
+                            menuSelection = menuSelection,
+                            appViewModel = appViewModel
                         )
 
                         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
@@ -287,24 +286,6 @@ fun ResultScreen(
                 }
             }
         }
-//        LazyColumn(
-//            modifier = modifier
-//                .fillMaxWidth()
-//                .padding(all = 10.dp)
-//        ) {
-//            items(busRouteArray1Length) {index ->
-//                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
-//
-//                BusStopComposable(
-//                    busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
-//                    busStopDetailsJSON = busServicesRouteList.busStopDetailsJSONList[index],
-//                    busServiceBool = busServiceBool,
-//                    modifier = modifier
-//                )
-//
-//                Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
-//            }
-//        }
 
     }
     else {
@@ -317,12 +298,13 @@ fun ResultScreen(
             modifier = modifier,
             busServiceBool = busServiceBool,
             favouriteViewModel = favouriteBusStopViewModel,
-            appViewModel = appViewModel,
-            menuSelection = menuSelection
+            menuSelection = menuSelection,
+            appViewModel = appViewModel
         )
 
         Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
     }
+}
 
 
 @Composable
@@ -406,27 +388,6 @@ fun SearchView(
                 shape = RoundedCornerShape(25)
             )
         }
-
-//        Row{
-//            Spacer(modifier = modifier.weight(3f))
-//            // Button for User to Click to begin Search
-//            Button(
-//                onClick = {
-//                    // TODO Pass the User Query to the Search Function
-//                    onKeyboardSearch()
-//                },
-//                modifier = modifier
-//                    .align(Alignment.CenterVertically)
-//                    .padding(2.dp)
-//                    .weight(1f)
-//                    .height(30.dp),
-//            ) {
-//                Text(
-//                    text = stringResource(R.string.search_button_flavor_text),
-//                    fontSize = 11.sp
-//                )
-//            }
-//        }
     }
 
 }

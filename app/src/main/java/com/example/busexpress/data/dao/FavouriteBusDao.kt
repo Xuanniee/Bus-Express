@@ -42,7 +42,7 @@ interface FavouriteBusStopDao {
     @Query(value = "SELECT * FROM `User's Favourites List` WHERE id = :id") // Variable Substitution
     fun retrieveFavouriteBusStops(id: Int): Flow<FavouriteBusStop?>
 
-    @Query(value = "SELECT * FROM `User's Favourites List` WHERE goingOutBusStop = 0")  // 0 is True here
+    @Query(value = "SELECT * FROM `User's Favourites List` WHERE goingOutBusStop = 0")  // 0 is True here, i.e. Going Out
     fun retrieveGoingOutFavouriteBusStops(): Flow<List<FavouriteBusStop?>>
 
     @Query(value = "SELECT * FROM `User's Favourites List` WHERE goingOutBusStop = 1")

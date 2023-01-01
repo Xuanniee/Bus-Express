@@ -1,6 +1,5 @@
 package com.example.busexpress.ui.screens
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,7 +13,6 @@ import com.example.busexpress.BusExpressApplication
 import com.example.busexpress.data.SingaporeBusRepository
 import com.example.busexpress.determineBusServiceorStop
 import com.example.busexpress.network.*
-import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +42,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     val multipleBusUiState: StateFlow<BusServicesRoute> = _multipleBusUiState.asStateFlow()
 
     private val _multipleBusStopNameUiState = MutableStateFlow(BusStopValue())
-    val multipleBusStopNameUiState: StateFlow<BusStopValue> = _multipleBusStopNameUiState.asStateFlow()
+//    val multipleBusStopNameUiState: StateFlow<BusStopValue> = _multipleBusStopNameUiState.asStateFlow()
 
     /**
      * StateFlow
@@ -62,12 +60,21 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     // Boolean to determine if we should show Bus Stops or Routes
     var busServiceBoolUiState: Boolean by mutableStateOf(false)
 
-    /**
-     * Call init so we can display status immediately.
-     */
-    init {
+//    /**
+//     * Call init so we can display status immediately.
+//     */
+//    init {
+//
+//    }
 
-    }
+    /**
+     * Function to refresh Bus Timings for Bus Stops
+     */
+//    fun refreshBusStopTimings(busStopCode: String) {
+//        viewModelScope.launch {
+//            getBusTimings()
+//        }
+//    }
 
     /**
      *  Function to get Bus Timings depending on Bus Service No. or Bus Stop Code
@@ -92,7 +99,6 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
                 getBusStopNames(targetBusStopCode = userInputResult.busStopCode?.toInt())
                 getBusTimings(userInput = userInputResult.busStopCode)
             }
-            Log.d("DebugTag","HERE!!!")
         }
     }
 

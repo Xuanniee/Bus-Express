@@ -8,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,7 +22,6 @@ import com.example.busexpress.R
 import com.example.busexpress.network.*
 import com.example.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
 import com.example.busexpress.ui.screens.AppViewModel
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -35,8 +33,8 @@ fun BusStopComposable(
     busStopDetailsJSON: BusStopValue,
     busServiceBool: Boolean,
     favouriteViewModel: FavouriteBusStopViewModel,
-    appViewModel: AppViewModel,
     menuSelection: MutableState<MenuSelection>,
+    appViewModel: AppViewModel,
     modifier: Modifier = Modifier
 ) {
     // Bus Arrival Timing Details
@@ -90,7 +88,10 @@ fun BusStopComposable(
                 // Appears only iif not Expanded
                 BusComposableRefreshButton(
                     onClick = {
-                        // TODO Refresh
+                        // Refresh for the particular Bus Stop
+                        appViewModel.determineUserQuery(currentBusStopCode)
+
+                        // TODO Open the Bus Stop again for User
 
                     }
                 )
@@ -133,19 +134,19 @@ fun BusStopComposable(
     }
 }
 
-@Composable
-fun BusComposableMenuButton(
-    onClick: () -> Unit
-) {
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Filled.Favorite,
-            tint = MaterialTheme.colors.secondary,
-            contentDescription = stringResource(R.string.bus_composable_menu_desc)
-        )
-    }
-
-}
+//@Composable
+//fun BusComposableMenuButton(
+//    onClick: () -> Unit
+//) {
+//    IconButton(onClick = onClick) {
+//        Icon(
+//            imageVector = Icons.Filled.Favorite,
+//            tint = MaterialTheme.colors.secondary,
+//            contentDescription = stringResource(R.string.bus_composable_menu_desc)
+//        )
+//    }
+//
+//}
 
 @Composable
 fun BusComposableRefreshButton(
