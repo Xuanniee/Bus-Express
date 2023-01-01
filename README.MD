@@ -4,7 +4,7 @@
 ## Project Description
 ---
 
-!["Homepage"](Homepage.png "Image of the Default Homepage")
+!["Homepage"](AppImages/Homepage.png "Image of the Default Homepage")
 **Bus Express** is a simple, no-frills application that allows users to query details about incoming buses in Singapore by using LTA Datamall's API. The Privacy Policy can be found at the bottom for your persual. A quick guide is also written on the front page of the app.
 The application is hosted in the Google Play Store, and can be found here:
 
@@ -12,13 +12,13 @@ The application is hosted in the Google Play Store, and can be found here:
 ---
 
 1. Queries for the arrival timings, alongside a few metadata information about the incoming 3 buses.
-!["Unexpanded Search Results"](`Unexpanded Search Results.png` "Image of search results before interaction")
+!["Unexpanded Search Results"](AppImages/`Unexpanded Search Results.png` "Image of search results before interaction")
 
 By providing the bus stop code, which uniquely identifies all the bus stops in Singapore, Bus Express is able to return the desired bus stop as shown above. 
 By clicking the left icon, the user retrieves all the necessary information about incoming buses as shown below.
 By clicking the right icon, the user can choose to add this particular bus stop into their favourites list.
 
-!["Search Results"](`Search Results.png` "Image of search results after interaction")
+!["Search Results"](AppImages/`Search Results.png` "Image of search results after interaction")
 
 As the picture shows, the user is provided all the bus services that passes by the requested bus stop. They can then see the estimated arrival timings, in minutes, of the next three buses. In addition, users will know the type of bus that is coming, such as a bendy or a double decker bus. The wheelchair icon tells users if the incoming bus is wheelchair accessible, as not all bus models have this capability.
 The coloured bar below provides a visual representation of the occupancy rates of the buses, with 3 possible states:
@@ -29,23 +29,28 @@ The coloured bar below provides a visual representation of the occupancy rates o
 The right icon has also changed from a "More Options" icon to a "Refresh" icon, allowing users to update the timings for that particular bus stop.
 
 2. Adding the frequently accessed bus stops to your favourites list.
-!["Adding to Favourites"](AddFavourites.png "Image of adding favourites feature")
+!["Adding to Favourites"](AppImages/AddFavourites.png "Image of adding favourites feature")
 
 As mentioned earlier, clicking the "More Options" icon would allow users to add the bus stop to their favourites list. Users are provided with 2 options as shown, either "Going Out" or "Coming Back". Regardless of the option chosen, the bus stop will be added to their favourites. The difference is your favourites list can be divided into 2, allowing you to put the bus stops that matches your journey into 1 of the 2, making it more accessible and convenient to locate bus stops.
 
-!["Favourites List"](Favourites.png "Image of favourites list")
+!["Favourites List"](AppImages/Favourites.png "Image of favourites list")
 
 After adding a bus stop to your favourites, users can navigate to them using the left navigation bar. They can click the 2 tabs on top to decide which favourites list they wish to access. As you can see, clicking any of the bus stops in your favourites will retrieve the same information as before.
 
 3. Retrieving the bus routes of any bus service number.
-!["Bus Routes"](`Bus Routes Timing.png`  "Image of a bus's bus route")
+!["Bus Routes"](AppImages/`Bus Routes Timing.png`  "Image of a bus's bus route")
 
 Alternatively, users may choose to provide a bus service number instead of the bus stop code. This would return the bus route, which is a list of all the bus stops that this particular bus service would travel to. Clicking any of the bus stops in the route would also yield the same information as mentioned. There are also 2 tabs at the top, which represents the 2 possible direction a bus service will travel in. Switch between the 2 tabs to find your bus stop. If the bus service is a loop like 962, there will only be 1 tab on top.
 
 4. Dark Mode
-!["Dark Mode"](DarkMode.png "Image of Dark Mode")
+!["Dark Mode"](AppImages/DarkMode.png "Image of Dark Mode")
 
 Although dark mode has been implemented on the application, it is still very rough around the edges as the color contrast for certain composables like icons are bad. There is also no dedicated button to switch between the 2 themes currently. This means that the application will simply follow the theme of your phone. If your phone is in dark mode, it will be launched in the dark mode and vice versa.
+
+5. Navigation
+!["Navigation"](AppImages/Navigation.png "Image of side navigation bar")
+
+Users can navigate between the various screens of the application by making use of the sidebar.
 
 ## Additional Features (Yet to be Implemented)
 ---
