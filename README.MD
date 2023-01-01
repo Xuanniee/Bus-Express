@@ -1,6 +1,4 @@
 # Bus Express [Android - Kotlins & Jetpack Compose]
-#### Video Demo:  https://youtu.be/eIcMZXwWiK0
-#### Description: As shown in rest of README.md
 
 ## Project Description
 
@@ -110,7 +108,7 @@ Users can navigate between the various screens of the application by making use 
 * Review of releases in Play Console and subsequent release of application
 
 ## Video Link
-
+https://youtu.be/eIcMZXwWiK0
 
 ## Application Privacy Policy
 
