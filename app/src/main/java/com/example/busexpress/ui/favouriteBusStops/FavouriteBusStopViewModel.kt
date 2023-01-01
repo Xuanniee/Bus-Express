@@ -1,22 +1,25 @@
 package com.example.busexpress.ui.favouriteBusStops
 
 import android.util.Log
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.busexpress.BusExpressApplication
-import com.example.busexpress.data.*
+import com.example.busexpress.data.BusStopsInFavourites
+import com.example.busexpress.data.FavouriteBusStopList
+import com.example.busexpress.data.FavouriteBusStopRepository
+import com.example.busexpress.data.SingaporeBusRepository
 import com.example.busexpress.network.BusStopValue
 import com.example.busexpress.network.SingaporeBus
-import com.example.busexpress.ui.screens.AppViewModel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 /**
  * Basically, what I need to do is code such that the viewModels do not rely on each other functions
@@ -24,7 +27,7 @@ import kotlinx.coroutines.launch
 /**
  * View Model to validate and insert items in the Room database.
  */
-class FavouriteBusStopViewModel(private val favouriteBusStopRepository: FavouriteBusStopRepository): ViewModel() {
+class FavouriteBusStopViewModel(private val favouriteBusStopRepository: FavouriteBusStopRepository, private val singaporeBusRepository: SingaporeBusRepository): ViewModel() {
     /**
      *  StateFlows to store the Data of Database
      */
@@ -43,62 +46,154 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
     val busStopsInFavUiState: StateFlow<BusStopsInFavourites> = _busStopsInFavUiState.asStateFlow()
 
     /**
+     *  StateFlows to store the Data of API Calls
+     */
+    private val _favTimingUiState = MutableStateFlow(SingaporeBus())
+    val favTimingUiState: StateFlow<SingaporeBus> = _favTimingUiState.asStateFlow()
+
+    private val _favDetailsUiState = MutableStateFlow(BusStopValue())
+    val favDetailUiState: StateFlow<BusStopValue> = _favDetailsUiState.asStateFlow()
+
+    var favouritesUiState: FavouriteDetailsUiState by mutableStateOf(FavouriteDetailsUiState.Loading)
+
+
+    /**
      * Holds the current Ui State
      */
-    var favouriteBusStopUiState by mutableStateOf(FavouriteBusStopUiState())
-        private set
+    private var favouriteBusStopUiState by mutableStateOf(FavouriteBusStopUiState())
 
     /**
      * Function to return Favourite buses to the Composable
      */
     fun determineOutAndBack(
         goingOutFavouriteUiState: FavouriteBusStopList,
-        appViewModel: AppViewModel,
-        busStopNameUiState: BusStopValue,
-        busServiceUiState: SingaporeBus,
     ) {
-        // Retrieve Bus Stops ONCE for Favourites [Both Going Out]
-        val busStopList = goingOutFavouriteUiState.busStopList
-        val busStopListLength = busStopList.size - 1
-        Log.d("DebugTag", "Size of Bus Stop List $busStopList")
+        viewModelScope.launch {
+            // Retrieve Bus Stops ONCE for Favourites [Both Going Out]
+            val busStopList = goingOutFavouriteUiState.busStopList
+            val busStopListLength = busStopList.size - 1
+            Log.d("DebugTag", "Size of Bus Stop List ${busStopList.size}")
 
-        // 2 Lists each for Going Out and Coming Back
-        val singaporeBusGoingOutList: MutableList<SingaporeBus> = mutableListOf()
-        val singaporeBusComingBackList: MutableList<SingaporeBus> = mutableListOf()
-        val busStopValueGoingOutList: MutableList<BusStopValue> = mutableListOf()
-        val busStopValueComingBackList: MutableList<BusStopValue> = mutableListOf()
+            // 2 Lists each for Going Out and Coming Back
+            val singaporeBusGoingOutList: MutableList<SingaporeBus> = mutableListOf()
+            val singaporeBusComingBackList: MutableList<SingaporeBus> = mutableListOf()
+            val busStopValueGoingOutList: MutableList<BusStopValue> = mutableListOf()
+            val busStopValueComingBackList: MutableList<BusStopValue> = mutableListOf()
 
-        // Determine Bus Details
-        for (index in 0..busStopListLength) {
-            // Retrieve Current Bus Stop
-            val currentBusStop = busStopList[index]?.favouriteBusStopCode
-            Log.d("DebugTag", "Current Busstop $currentBusStop")
-            // Use Bus Stop Code to get Bus Details and Stuff
-            appViewModel.determineUserQuery(currentBusStop.toString())
+            // Determine Bus Details
+            for (index in 0..busStopListLength) {
+                // Retrieve Current Bus Stop
+                val currentBusStop = busStopList[index]?.favouriteBusStopCode
+                Log.d("DebugTag", "Current Busstop $currentBusStop")
 
-            // Save Timings & Details in an array from API Call
-            if (busStopList[index]?.goingOutBusStop == 0) {
-                // Going Out
-                singaporeBusGoingOutList.add(busServiceUiState)
-                Log.d("DebugTag", busServiceUiState.toString())
-                busStopValueGoingOutList.add(busStopNameUiState)
-                Log.d("DebugTag", busServiceUiState.toString())
+                // Use Bus Stop Code to get Bus Details and Stuff
+                getFavouriteTimeAndDetails(targetBusStopCode = currentBusStop?.toInt())
+                Log.d("DebugTag", "CAME OUT!!!!")
+
+                // Save Timings & Details in an array from API Call
+                if (busStopList[index]?.goingOutBusStop == 0) {
+                    // Going Out
+                    singaporeBusGoingOutList.add(_favTimingUiState.value)
+                    Log.d("DebugTag", _favTimingUiState.value.toString())
+                    busStopValueGoingOutList.add(_favDetailsUiState.value)
+                    Log.d("DebugTag", _favDetailsUiState.value.toString())
+                }
+                else {
+                    // Coming Back
+                    singaporeBusComingBackList.add(_favTimingUiState.value)
+                    busStopValueComingBackList.add(_favDetailsUiState.value)
+                }
             }
-            else {
-                // Coming Back
-                singaporeBusComingBackList.add(busServiceUiState)
-                busStopValueComingBackList.add(busStopNameUiState)
-            }
+
+            // Update after the For Loop
+            _busStopsInFavUiState.value = BusStopsInFavourites(
+                singaporeBusComingBackList = singaporeBusComingBackList,
+                singaporeBusGoingOutList = singaporeBusGoingOutList,
+                busStopValueComingBackList = busStopValueComingBackList,
+                busStopValueGoingOutList = busStopValueGoingOutList
+            )
         }
 
-        // Update after the For Loop
-        _busStopsInFavUiState.value = BusStopsInFavourites(
-            singaporeBusComingBackList = singaporeBusComingBackList,
-            singaporeBusGoingOutList = singaporeBusGoingOutList,
-            busStopValueComingBackList = busStopValueComingBackList,
-            busStopValueGoingOutList = busStopValueGoingOutList
-        )
 
+    }
+
+    /**
+     * Function that gets the Bus Timings and Details of Favourite Bus Stops
+     */
+    private suspend fun getFavouriteTimeAndDetails(targetBusStopCode: Int?) {
+        favouritesUiState = FavouriteDetailsUiState.Loading
+        // Get Bus Stop Names
+        favouritesUiState = try {
+            var targetBusStop = BusStopValue()
+            var targetBusStopFound = false
+            var skipIndex = 0
+
+            Log.d("DebugTag", targetBusStopCode.toString())
+
+            // Timings Result
+            val listResultTimings = favouriteBusStopRepository.getBusFavTimings(
+                busStopCode = targetBusStopCode.toString(),
+                busServiceNumber = null
+            )
+            Log.d("DebugTag2", listResultTimings.toString())
+
+            _favTimingUiState.value = SingaporeBus(
+                metaData = listResultTimings.metaData,
+                busStopCode = listResultTimings.busStopCode,
+                services = listResultTimings.services
+            )
+            Log.d("DebugTag", "INSIDE FUNCTION I NEED: ${_favTimingUiState.value}")
+
+            // Retrieve the Desired Bus Stop Object
+            do {
+                val listResultDetails = favouriteBusStopRepository.getBusFavDetails(numRecordsToSkip = skipIndex)
+
+                val busStopDetails = listResultDetails.value
+                val forLoopSize = busStopDetails.size
+                var indexBSD = 0
+
+                // Loop through the 500 Records of this Call to see if the Bus Stop we want is inside
+                for(i in 1..forLoopSize) {
+                    if (busStopDetails[indexBSD].busStopCode.toInt() == targetBusStopCode) {
+                        targetBusStopFound = true
+                        break
+                    }
+                    // Update to check every Record of API Call
+                    indexBSD += 1
+                }
+
+                // Check if the Bus Stop we want is in this API Call
+                if (targetBusStopFound) {
+                    targetBusStop = busStopDetails[indexBSD]
+                }
+                else {
+                    // Call the Next 500/ or whatever size pulled Records
+                    skipIndex += forLoopSize
+                }
+            } while(!targetBusStopFound)
+
+            // After finding the Correct Bus Stop
+            if (targetBusStop.busStopCode != "Bus Stop Not Found") {
+                _favDetailsUiState.value = BusStopValue(
+                    busStopCode = targetBusStop.busStopCode,
+                    busStopRoadName = targetBusStop.busStopRoadName,
+                    busStopDescription = targetBusStop.busStopDescription,
+                    latitude = targetBusStop.latitude,
+                    longitude = targetBusStop.longitude
+                )
+                Log.d("DebugTag", "INSIDE FUNTION I NEED: ${_favDetailsUiState.value.toString()}")
+            }
+            Log.d("Debug2", "Secret error")
+            FavouriteDetailsUiState.Success(targetBusStop.busStopRoadName)
+        }
+        catch (e: IOException) {
+            Log.d("Debug2", "IOException error")
+            FavouriteDetailsUiState.Error
+        }
+        catch (e: HttpException) {
+            Log.d("Debug2", "HTTP error")
+            FavouriteDetailsUiState.Error
+        }
     }
 
     /**
@@ -161,16 +256,23 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
          */
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application =
-                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BusExpressApplication)
+                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BusExpressApplication)
                 val favouriteBusStopRepository = application.container.favouriteBusStopRepository
-                FavouriteBusStopViewModel(favouriteBusStopRepository = favouriteBusStopRepository)
+                val busRepository = application.container.singaporeBusRepository
+                FavouriteBusStopViewModel(
+                    favouriteBusStopRepository = favouriteBusStopRepository,
+                    singaporeBusRepository = busRepository
+                )
             }
         }
     }
 }
 
-
+sealed interface FavouriteDetailsUiState {
+    data class Success(val busStopName: String): FavouriteDetailsUiState
+    object Error: FavouriteDetailsUiState
+    object Loading: FavouriteDetailsUiState
+}
 
 
 

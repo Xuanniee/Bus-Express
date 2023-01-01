@@ -37,6 +37,9 @@ fun FavouritesScreen(
     busStopsInFavourites: BusStopsInFavourites,
     modifier: Modifier = Modifier,
 ) {
+    // StateFlow Var
+    val favDetailsUiState = favouriteBusStopViewModel.favDetailUiState.collectAsState()
+
     // Variable to remember Tab Row
     var tapRowState by rememberSaveable { mutableStateOf(0) }
     val tapRowTitles = listOf("Going Out", "Coming Back")

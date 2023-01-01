@@ -28,6 +28,7 @@ class DefaultAppContainer(private val context: Context): AppContainer {
     private val BASE_URL =
         "http://datamall2.mytransport.sg/ltaodataservice/"
 
+    // For AppViewModel
     @OptIn(ExperimentalSerializationApi::class)
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
@@ -44,7 +45,10 @@ class DefaultAppContainer(private val context: Context): AppContainer {
     }
 
     override val favouriteBusStopRepository: FavouriteBusStopRepository by lazy {
-        OfflineFavouriteBusRepository(FavouritesBusDatabase.getDatabase(context).favouriteBusDao())
+        DefaultFavouriteBusRepository(
+            favouriteBusStopDao = FavouritesBusDatabase.getDatabase(context).favouriteBusDao(),
+            busApiService = retrofitService
+        )
     }
 }
 

@@ -198,9 +198,6 @@ fun BusExpressNavigationDrawer(
             onClick = {
                 favouriteBusStopViewModel.determineOutAndBack(
                     goingOutFavouriteUiState = goingOutFavouriteUiState,
-                    appViewModel = appViewModel,
-                    busServiceUiState = busServiceUiState,
-                    busStopNameUiState = busStopNameUiState,
                 )
                 navController.navigate(BusExpressScreen.FavouritesAway.name)
                 scope.launch { scaffoldState.drawerState.close() }
