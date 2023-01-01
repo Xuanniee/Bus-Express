@@ -4,7 +4,6 @@
 
 <img src="AppImages/Homepage.png" alt="Homepage" width="30%">
 Bus Express is a simple, no-frills application that allows users to query details about incoming buses in Singapore by using LTA Datamall's API. 
-
 The Privacy Policy can be found at the bottom for your persual. A quick guide is also written on the front page of the app.
 
 The application is hosted in the Google Play Store, and can be found here:
