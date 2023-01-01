@@ -166,7 +166,8 @@ fun BusExpressNavigationDrawer(
         ) {
             Image(
                 imageVector = Icons.Filled.Home,
-                contentDescription = null
+                contentDescription = null,
+
             )
             Text(stringResource(R.string.home_navigation_desc))
         }

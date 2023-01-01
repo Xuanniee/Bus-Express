@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.BusExpress" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/NavyBlack</item>
+        <item name="android:iconTint">@color/PureWhite</item>
+        <item name="android:drawableTint">@color/PureWhite</item>
+        <item name="android:buttonTint">@color/PureWhite</item>
+    </style>
+</resources>

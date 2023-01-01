@@ -2,4 +2,5 @@
 <resources>
     <color name="DarkBlueGrey">#FF1C313A</color>
     <color name="PureWhite">#FFFFFFFF</color>
+    <color name="NavyBlack">#FF404258</color>
 </resources>
