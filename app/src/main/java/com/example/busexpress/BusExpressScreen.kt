@@ -64,16 +64,16 @@ fun BusExpressAppTopBar(
                 )
             }
         },
-        actions = {
-            // Already in a RowScope, so will be placed Horizontally
-            IconButton(onClick = { /*TODO DARK MODE*/ }) {
-                Icon(
-                    imageVector = Icons.Filled.DarkMode,
-                    contentDescription = stringResource(R.string.dark_mode_description)
-                )
-
-            }
-        },
+//        actions = {
+//            // Already in a RowScope, so will be placed Horizontally
+//            IconButton(onClick = { /*TODO DARK MODE*/ }) {
+//                Icon(
+//                    imageVector = Icons.Filled.DarkMode,
+//                    contentDescription = stringResource(R.string.dark_mode_description)
+//                )
+//
+//            }
+//        },
         elevation = 20.dp
     )
 }

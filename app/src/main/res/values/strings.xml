@@ -27,6 +27,6 @@
     <string name="search_loading_screen_desc">Your search results will appear here!!</string>
     <string name="search_nav_desc">Search</string>
     <string name="searchbar_redirect_content_desc">Click to Search for Buses</string>
-    <string name="tutorial_default_desc">\u2022 Click on the search bar on top to begin searching for a bus stop or bus service number.\n \u2022 You can navigate the application using the sidebar.</string>
+    <string name="tutorial_default_desc">\u2022 Click on the search bar on top to begin searching for a bus stop or bus service number.\n \u2022 You can navigate the application using the sidebar. \n \u2022 Dark mode can be applied by turning on the system wide dark mode. \n \u2022 As this is a student project, it will not be as robust as other alternatives. Thank you!!</string>
     <string name="default_screen_greetings">Thank you for using Bus Express SG!!!</string>
 </resources>

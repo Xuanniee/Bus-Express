@@ -77,7 +77,7 @@ fun DefaultScreen(
             style = MaterialTheme.typography.body2,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Start,
-            maxLines = 3,
+            maxLines = 7,
             modifier = modifier.padding(5.dp)
         )
 
