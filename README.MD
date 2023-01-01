@@ -10,7 +10,7 @@ The application is hosted in the Google Play Store, and can be found here:
 
 ## Content
 
-### 1. Queries for the arrival timings, alongside a few metadata information about the incoming 3 buses.
+### 1. Queries for Bus Details
 <img src="AppImages/UnexpandedSearchResults.png" alt="Unexpanded Search Results" width="30%">
 
 By providing the bus stop code, which uniquely identifies all the bus stops in Singapore, Bus Express is able to return the desired bus stop as shown above. 
