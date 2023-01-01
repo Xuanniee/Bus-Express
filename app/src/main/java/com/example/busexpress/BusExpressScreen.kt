@@ -207,21 +207,24 @@ fun BusExpressNavigationDrawer(
             Text(stringResource(R.string.favourites_navigation_desc))
         }
 
-        Button(
-            onClick = {
-                navController.navigate(BusExpressScreen.Nearby.name)
-                scope.launch { scaffoldState.drawerState.close() }
-            },
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(all = 5.dp)
-        ) {
-            Image(
-                imageVector = Icons.Filled.LocationOn,
-                contentDescription = null
-            )
-            Text(text = stringResource(R.string.nearby_navigation_desc))
-        }
+        /**
+         * Nearby is hidden as not built yet so can release the app
+         */
+//        Button(
+//            onClick = {
+//                navController.navigate(BusExpressScreen.Nearby.name)
+//                scope.launch { scaffoldState.drawerState.close() }
+//            },
+//            modifier = modifier
+//                .fillMaxWidth()
+//                .padding(all = 5.dp)
+//        ) {
+//            Image(
+//                imageVector = Icons.Filled.LocationOn,
+//                contentDescription = null
+//            )
+//            Text(text = stringResource(R.string.nearby_navigation_desc))
+//        }
 
         // Easter Egg Button
 //        Button(
