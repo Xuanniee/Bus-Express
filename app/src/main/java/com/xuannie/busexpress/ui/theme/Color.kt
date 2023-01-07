@@ -13,7 +13,7 @@ val BlueWhite = Color(0xFF608E9E)       // Secondary
 val DarkBlueWhite = Color(0xFF326170)   // Secondary Variant Dark
 val LightBlueWhite = Color(0xFF90BECF)  // Secondary Variant Light
 
-val BlueGrey100 = Color(0xFFeceff1)     // Background
+val BlueGrey100 = Color(0xFFECEFF1)     // Background
 val DarkBlueGrey100 = Color(0xFFbabdbe) // Background Variant Dark
 val LightBlueGrey100 = Color(0xFFffffff)// Background Variant Light
 
