@@ -21,22 +21,31 @@ import java.io.IOException
 
 
 /**
- * [AppViewModel] holds information about a cupcake order in terms of quantity, flavor, and
- * pickup date. It also knows how to calculate the total price based on these order details.
+ * [AppViewModel]  is the main ViewModel that manages the business logic of the app, such as
+ * fetching bus data, routes, and stop information. It interacts with a SingaporeBusRepository,
+ * which presumably handles API calls to fetch bus-related data from a server.
+ *
+ * Uses stateflows and mutable state variables to hold UI data and manage async operations
  */
 class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): ViewModel() {
     /**
      *  StateFlows to store the Data of API Calls
+     *  Stateflow objects so that they can be observed by UI components to trigger re-rendering
+     *  when data changes.
      */
+    // Holds state of Bus Service
     private val _busServiceUiState = MutableStateFlow(SingaporeBus())
     val busServiceUiState: StateFlow<SingaporeBus> = _busServiceUiState.asStateFlow()
 
+    // Stores state of Bus Stop Name
     private val _busStopNameUiState = MutableStateFlow(BusStopValue())
     val busStopNameUiState: StateFlow<BusStopValue> = _busStopNameUiState.asStateFlow()
 
+    // Represent states of bus route
     private val _busRouteUiState = MutableStateFlow(BusRoutes())
     val busRouteUiState: StateFlow<BusRoutes> = _busRouteUiState.asStateFlow()
 
+    // Contains info about multiple bus services
     private val _multipleBusUiState = MutableStateFlow(BusServicesRoute())
     val multipleBusUiState: StateFlow<BusServicesRoute> = _multipleBusUiState.asStateFlow()
 
@@ -56,7 +65,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 
     private var busRoutingUiState: BusRouteUiState by mutableStateOf(BusRouteUiState.Loading)
 
-    // Boolean to determine if we should show Bus Stops or Routes
+    // Tracks whether the user has searched for a bus stop code or a bus service number.
     var busServiceBoolUiState: Boolean by mutableStateOf(false)
 
 //    /**
@@ -81,6 +90,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
      fun determineUserQuery(userInput: String) {
         // Determine if User Provided a Bus Service No. or Bus Stop Code
         val userInputResult = determineBusServiceorStop(userInput)
+
         viewModelScope.launch {
             if (userInputResult.busServiceBool) {
                 busServiceBoolUiState = true
