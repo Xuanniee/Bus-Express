@@ -4,9 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
-import com.xuannie.busexpress.ui.screens.AppViewModel
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 import com.xuannie.busexpress.ui.theme.BusExpressTheme
+import com.xuannie.busexpress.ui.viewmodels.LiveTripViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,11 +16,17 @@ class MainActivity : ComponentActivity() {
             BusExpressTheme {
                 val viewModel: AppViewModel =
                      viewModel(factory = AppViewModel.Factory)
+
                 val favViewModel: FavouriteBusStopViewModel =
                     viewModel(factory = FavouriteBusStopViewModel.Factory)
+
+                val liveTripViewModel: LiveTripViewModel =
+                    viewModel(factory = LiveTripViewModel.Factory)
+
                 BusExpressApp(
                     appViewModel = viewModel,
-                    favouriteBusStopViewModel = favViewModel
+                    favouriteBusStopViewModel = favViewModel,
+                    liveTripViewModel = liveTripViewModel
                 )
             }
         }

@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.xuannie.busexpress.data.BusStopsInFavourites
 import com.xuannie.busexpress.ui.component.BusStopComposable
 import com.xuannie.busexpress.ui.component.MenuSelection
-import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 
 
 @SuppressLint("CoroutineCreationDuringComposition")

@@ -30,7 +30,9 @@ import com.xuannie.busexpress.BusExpressScreen
 import com.xuannie.busexpress.network.*
 import com.xuannie.busexpress.ui.component.BusStopComposable
 import com.xuannie.busexpress.ui.component.MenuSelection
-import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.AppViewModel
+import com.xuannie.busexpress.ui.viewmodels.BusUiState
 import kotlinx.coroutines.launch
 
 @Composable

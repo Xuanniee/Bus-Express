@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
 import kotlinx.coroutines.launch
 
 /**

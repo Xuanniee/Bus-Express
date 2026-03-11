@@ -43,6 +43,9 @@ data class NextBusTiming(
     @SerialName(value = "OriginCode")
     val startingBusStop: String = "No Bus Service Available",
 
+    @SerialName("Monitored")
+    val monitored: Int? = null,
+
     @SerialName(value = "DestinationCode")
     val endingBusStop: String = "No Bus Service Available",
 

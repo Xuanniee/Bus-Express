@@ -24,10 +24,12 @@ import com.xuannie.busexpress.network.BusStopValue
 import com.xuannie.busexpress.network.SingaporeBus
 import com.xuannie.busexpress.network.UserInputResult
 import com.xuannie.busexpress.ui.component.MenuSelection
-import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
 import com.xuannie.busexpress.ui.screens.*
 import com.xuannie.busexpress.ui.theme.Grey900
 import com.xuannie.busexpress.ui.theme.NavigationDrawer
+import com.xuannie.busexpress.ui.viewmodels.AppViewModel
+import com.xuannie.busexpress.ui.viewmodels.LiveTripViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -36,7 +38,8 @@ enum class BusExpressScreen(@StringRes val title: Int) {
     Default(title = R.string.app_name),
     Favourites(title = R.string.favourites),
     Nearby(title = R.string.nearby),
-    Search(title = R.string.search)
+    Search(title = R.string.search),
+    LiveTrip(title = R.string.live_trip)
 }
 
 
@@ -64,16 +67,6 @@ fun BusExpressAppTopBar(
                 )
             }
         },
-//        actions = {
-//            // Already in a RowScope, so will be placed Horizontally
-//            IconButton(onClick = { /*TODO DARK MODE*/ }) {
-//                Icon(
-//                    imageVector = Icons.Filled.DarkMode,
-//                    contentDescription = stringResource(R.string.dark_mode_description)
-//                )
-//
-//            }
-//        },
         elevation = 20.dp
     )
 }
@@ -188,6 +181,23 @@ fun BusExpressNavigationDrawer(
             Text(stringResource(id = R.string.search_nav_desc))
         }
 
+        // Live Trip Planner
+        Button(
+            onClick = {
+                navController.navigate(BusExpressScreen.LiveTrip.name)
+                scope.launch { scaffoldState.drawerState.close() }
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(all = 5.dp)
+        ) {
+            Image(
+                imageVector = Icons.Filled.TransferWithinAStation,
+                contentDescription = stringResource(R.string.live_trip_planner_desc)
+            )
+            Text(stringResource(id = R.string.live_trip))
+        }
+
         // Favourites
         Button(
             onClick = {
@@ -249,8 +259,9 @@ fun BusExpressNavigationDrawer(
 fun BusExpressApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    appViewModel: AppViewModel = viewModel(),
-    favouriteBusStopViewModel: FavouriteBusStopViewModel = viewModel(),
+    appViewModel: AppViewModel,
+    favouriteBusStopViewModel: FavouriteBusStopViewModel,
+    liveTripViewModel: LiveTripViewModel,
 ) {
     // Save Current Back Stack Entry
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -343,13 +354,20 @@ fun BusExpressApp(
                 )
             }
 
+            // 3. Live Trip Planner
+            composable(route = BusExpressScreen.LiveTrip.name) {
+                LiveTripMapScreen(
+                    viewModel = liveTripViewModel
+                )
+            }
+
             // 3. Nearby Screen
             composable(route = BusExpressScreen.Nearby.name) {
                 NearbyScreen(
                 )
             }
 
-            // 3. Favourites [Going Out]
+            // 4. Favourites [Going Out]
             composable(route = BusExpressScreen.Favourites.name) {
                 FavouritesScreen(
                     favouriteBusStopViewModel = favouriteBusStopViewModel,

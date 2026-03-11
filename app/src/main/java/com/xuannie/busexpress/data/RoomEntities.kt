@@ -10,9 +10,9 @@ data class FavouriteBusStop(
     val id: Int = 0,
 
     // To retrieve Bus Timings for the BusStops
-    val favouriteBusStopCode: String = "",
+    val favouriteBusStopCode: String,
 
-    val goingOutBusStop: Int = 0,
+    val goingOutBusStop: Int,
 )
 
 data class FavouriteBusStopList(

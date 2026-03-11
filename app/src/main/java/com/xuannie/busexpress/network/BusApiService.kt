@@ -15,7 +15,7 @@ interface BusApiService {
         "accept: application/json",
         "AccountKey: $LTA_API_SECRET_KEY"
     )
-    @GET("BusArrivalv2")
+    @GET("v3/BusArrival")
     suspend fun getTimingsOfBusStop(
         @Query("BusStopCode") BusStopCode: String? = null,
         @Query("ServiceNo") ServiceNo: String? = null
@@ -65,9 +65,3 @@ interface BusApiService {
     ): SingaporeBus
      */
 }
-
-
-
-
-
-

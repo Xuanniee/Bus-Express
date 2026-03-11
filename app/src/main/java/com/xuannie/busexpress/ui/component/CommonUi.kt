@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xuannie.busexpress.R
 import com.xuannie.busexpress.network.*
-import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopViewModel
-import com.xuannie.busexpress.ui.screens.AppViewModel
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

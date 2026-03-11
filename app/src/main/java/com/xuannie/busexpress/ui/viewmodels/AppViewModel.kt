@@ -1,5 +1,6 @@
-package com.xuannie.busexpress.ui.screens
+package com.xuannie.busexpress.ui.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.xuannie.busexpress.BusExpressApplication
 import com.xuannie.busexpress.data.SingaporeBusRepository
 import com.xuannie.busexpress.determineBusServiceorStop
 import com.xuannie.busexpress.network.*
@@ -307,6 +309,14 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         // Might have Connectivity Issues
         busUiState = try {
             // Within this Scope, use the Repository, not the Object to access the Data, abstracting the data within the Data Layer
+            try {
+                Log.d("LTA_VM", "Before repository call")
+                val result = singaporeBusRepository.getBusTimings(busStopCode, busServiceNumber)
+                Log.d("LTA_VM", "After repository call: services=${result.services.size}")
+                // update ui state here
+            } catch (e: Exception) {
+                Log.e("LTA_VM", "ViewModel fetch failed", e)
+            }
             val listResult = singaporeBusRepository.getBusTimings(
                 busServiceNumber = busServiceNumber,
                 busStopCode = busStopCode
@@ -332,7 +342,7 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[APPLICATION_KEY] as com.xuannie.busexpress.BusExpressApplication)
+                val application = (this[APPLICATION_KEY] as BusExpressApplication)
                 val singaporeBusRepository = application.container.singaporeBusRepository
                 AppViewModel(singaporeBusRepository = singaporeBusRepository)
             }

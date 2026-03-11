@@ -1,4 +1,4 @@
-package com.xuannie.busexpress.ui.favouriteBusStops
+package com.xuannie.busexpress.ui.viewmodels
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -9,9 +9,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.xuannie.busexpress.BusExpressApplication
 import com.xuannie.busexpress.data.*
 import com.xuannie.busexpress.network.BusStopValue
 import com.xuannie.busexpress.network.SingaporeBus
+import com.xuannie.busexpress.ui.favouriteBusStops.FavouriteBusStopUiState
+import com.xuannie.busexpress.ui.favouriteBusStops.isValid
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -250,7 +253,7 @@ class FavouriteBusStopViewModel(private val favouriteBusStopRepository: Favourit
          */
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as com.xuannie.busexpress.BusExpressApplication)
+                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BusExpressApplication)
                 val favouriteBusStopRepository = application.container.favouriteBusStopRepository
                 FavouriteBusStopViewModel(
                     favouriteBusStopRepository = favouriteBusStopRepository,
