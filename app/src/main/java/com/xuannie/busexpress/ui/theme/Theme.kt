@@ -1,29 +1,37 @@
 package com.xuannie.busexpress.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-private val DarkColorPalette = darkColors(
-    primary = DarkNavyBlack,
-    secondary = DarkPurpleBlack,
-    background = NavyBlack,
-    surface = DarkThemeSurface,
+private val DarkColorPalette = darkColorScheme(
+    primary = DarkCerulean,
+    secondary = QueenBlue,
+    background = DarkMidnightBlue,
+    surface = DarkCerulean,
     onPrimary = PureWhite,
+    onSecondary = PureWhite,
+    onBackground = PureWhite,
     onSurface = PureWhite,
+    surfaceVariant = BdazzledBlue,
+    onSurfaceVariant = PureWhite,
     error = Red900,
     onError = PureWhite
 )
 
-private val LightColorPalette = lightColors(
-    primary = BlueGrey700,
-    secondary = BlueWhite,
-    background = BlueGrey100,
-    surface = LightBlueGrey,
+private val LightColorPalette = lightColorScheme(
+    primary = DarkCerulean,
+    secondary = Rackley,
+    background = AirSuperiorityBlueLight,
+    surface = PureWhite,
     onPrimary = PureWhite,
-    onSurface = PureWhite,
+    onSecondary = TextDark,
+    onBackground = TextDark,
+    onSurface = TextDark,
+    surfaceVariant = AirSuperiorityBlue,
+    onSurfaceVariant = TextDark,
     error = Red900,
     onError = PureWhite
 
@@ -38,7 +46,10 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun BusExpressTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun BusExpressTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
@@ -46,7 +57,7 @@ fun BusExpressTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compos
     }
 
     MaterialTheme(
-        colors = colors,
+        colorScheme = colors,
         typography = Typography,
         shapes = Shapes,
         content = content

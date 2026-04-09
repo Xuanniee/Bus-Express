@@ -12,6 +12,8 @@ import com.xuannie.busexpress.BusExpressApplication
 import com.xuannie.busexpress.data.local.BusStopAssetRepository
 import com.xuannie.busexpress.data.repository.TransferRepository
 import com.xuannie.busexpress.domain.model.ActiveTrip
+import com.xuannie.busexpress.domain.model.RouteLeg
+import com.xuannie.busexpress.domain.model.RoutePoint
 import com.xuannie.busexpress.domain.model.TimelineStop
 import com.xuannie.busexpress.domain.model.TransferSuggestion
 import com.xuannie.busexpress.domain.model.TripProgress
@@ -44,7 +46,7 @@ data class LiveTripUiState(
 
     val currentTimelineIndex: Int = 0,
 
-    // CHANGED: current rendered marker position (can be animated smoothly)
+    // Current rendered marker position - Start at Punggol Bus Stop
     val currentLatitude: Double = 1.398950,
     val currentLongitude: Double = 103.904752,
 
@@ -52,8 +54,23 @@ data class LiveTripUiState(
 
     val isLoading: Boolean = false,
 
-    // CHANGED: snackbar message instead of error card
-    val snackbarMessage: String? = null
+    // Snackbar message instead of error card
+    val snackbarMessage: String? = null,
+
+    // List of coordinats for user to move from 1 coordiante to another to simulate moving on the road
+    val baselineLegs: List<RouteLeg> = emptyList(),
+    val transferLegs: List<RouteLeg> = emptyList(),
+
+    // Selected path
+    val activeLegPath: List<RoutePoint> = emptyList(),
+
+    // Current cooridiante of road
+    val activeLegStepIndex: Int = 0,
+
+    // To update the user theyr eached the destination
+    val showArrivalDialog: Boolean = false,
+    val arrivalTitle: String = "",
+    val arrivalMessage: String = "",
 )
 
 class LiveTripViewModel(
@@ -86,7 +103,12 @@ class LiveTripViewModel(
 
         if (origin.isBlank() || startIso.isBlank()) {
             _uiState.value = state.copy(
-                snackbarMessage = "Please enter origin bus stop and timestamp."
+                snackbarMessage = "Please enter origin bus stop and timestamp.",
+                showArrivalDialog = false,
+                arrivalTitle = "",
+                arrivalMessage = "",
+                activeLegPath = emptyList(),
+                activeLegStepIndex = 0,
             )
             return
         }
@@ -96,7 +118,12 @@ class LiveTripViewModel(
             OffsetDateTime.parse(startIso)
         } catch (e: Exception) {
             _uiState.value = state.copy(
-                snackbarMessage = "Timestamp must be ISO format, e.g. 2026-03-03T08:55:00+00:00"
+                snackbarMessage = "Timestamp must be ISO format, e.g. 2026-03-03T08:55:00+00:00",
+                showArrivalDialog = false,
+                arrivalTitle = "",
+                arrivalMessage = "",
+                activeLegPath = emptyList(),
+                activeLegStepIndex = 0
             )
             return
         }
@@ -118,13 +145,48 @@ class LiveTripViewModel(
             suggestion = null,
             baselineTimeline = emptyList(),
             transferTimeline = emptyList(),
+            baselineLegs = emptyList(),
+            transferLegs = emptyList(),
             journeyMode = JourneyMode.BASELINE,
             currentTimelineIndex = 0,
             transferDecisionMade = false,
-            snackbarMessage = null
+            snackbarMessage = null,
+            activeLegPath = emptyList(),
+            activeLegStepIndex = 0,
+            showArrivalDialog = false,
+            arrivalTitle = "",
+            arrivalMessage = ""
         )
 
         fetchTransferPlan()
+    }
+
+    /**
+     * Helper to get the curr cooridnates when moving along the road
+     */
+    private fun getCurrentLeg(state: LiveTripUiState): RouteLeg? {
+        val timeline = getCurrentTimeline(state)
+        val currentIndex = state.currentTimelineIndex
+        val nextIndex = currentIndex + 1
+
+        if (currentIndex < 0 || nextIndex >= timeline.size) return null
+
+        val currentStop = timeline[currentIndex]
+        val nextStop = timeline[nextIndex]
+
+        val legs = if (
+            state.journeyMode == JourneyMode.TRANSFER &&
+            state.transferLegs.isNotEmpty()
+        ) {
+            state.transferLegs
+        } else {
+            state.baselineLegs
+        }
+
+        return legs.find {
+            it.fromStopCode == currentStop.stopCode &&
+                    it.toStopCode == nextStop.stopCode
+        }
     }
 
     fun simulateTrip() {
@@ -146,41 +208,142 @@ class LiveTripViewModel(
             return
         }
 
+        val currentLeg = getCurrentLeg(state)
+        if (currentLeg == null || currentLeg.pathPoints.isEmpty()) {
+            _uiState.value = state.copy(
+                snackbarMessage = "No road path found for this leg."
+            )
+            return
+        }
+
+        // Do not jump straight to next stop anymore
+        _uiState.value = state.copy(
+            activeLegPath = currentLeg.pathPoints
+                .let { interpolateRoutePoints(it, stepsPerSegment = 6) },
+            activeLegStepIndex = 0,
+            snackbarMessage = null
+        )
+    }
+
+    private fun interpolateRoutePoints(
+        points: List<RoutePoint>,
+        stepsPerSegment: Int = 5
+    ): List<RoutePoint> {
+        if (points.size < 2) return points
+
+        val result = mutableListOf<RoutePoint>()
+
+        for (i in 0 until points.lastIndex) {
+            val start = points[i]
+            val end = points[i + 1]
+
+            result.add(start)
+
+            for (step in 1 until stepsPerSegment) {
+                val t = step.toDouble() / stepsPerSegment.toDouble()
+
+                val lat = start.latitude + (end.latitude - start.latitude) * t
+                val lon = start.longitude + (end.longitude - start.longitude) * t
+
+                result.add(
+                    RoutePoint(
+                        latitude = lat,
+                        longitude = lon
+                    )
+                )
+            }
+        }
+
+        result.add(points.last())
+        return result
+    }
+
+    fun advanceAlongActiveLeg() {
+        val state = _uiState.value
+        val path = state.activeLegPath
+
+        if (path.isEmpty()) return
+
+        val nextStep = state.activeLegStepIndex + 1
+
+        // Still travelling along the same road segment
+        if (nextStep < path.size) {
+            val point = path[nextStep]
+            _uiState.value = state.copy(
+                activeLegStepIndex = nextStep,
+                currentLatitude = point.latitude,
+                currentLongitude = point.longitude
+            )
+            return
+        }
+
+        // Finished the road segment, now officially arrive at next stop
+        val timeline = getCurrentTimeline(state)
+        val nextIndex = state.currentTimelineIndex + 1
+
+        if (nextIndex >= timeline.size) {
+            _uiState.value = state.copy(
+                activeLegPath = emptyList(),
+                activeLegStepIndex = 0,
+                snackbarMessage = "Trip simulation has reached the final stop."
+            )
+            return
+        }
+
         val nextStop = timeline[nextIndex]
         val nextTimestamp = nextStop.arrivalTimestamp
-
-        val updatedTrip = state.activeTrip?.copy(
-            simulatedTimestamp = nextTimestamp
-        )
-
         val reachedFinalStop = nextIndex == timeline.lastIndex
 
-        val updatedState = state.copy(
-            activeTrip = updatedTrip?.copy(
-                isActive = !reachedFinalStop
-            ),
+        val updatedTrip = state.activeTrip?.copy(
+            simulatedTimestamp = nextTimestamp,
+            isActive = !reachedFinalStop
+        )
+
+        val finalStopName = nextStop.stopName
+        val finalTime = formatTime(nextTimestamp)
+
+        val arrivedState = state.copy(
+            activeTrip = updatedTrip,
             simulatedTimestamp = nextTimestamp,
             simulatedTimeDisplay = formatTime(nextTimestamp),
             currentTimelineIndex = nextIndex,
             transferDecisionMade = false,
-            snackbarMessage = if (reachedFinalStop) {
-                "You have reached your destination."
+            activeLegPath = emptyList(),
+            activeLegStepIndex = 0,
+            snackbarMessage = null,
+            showArrivalDialog = reachedFinalStop,
+            arrivalTitle = if (reachedFinalStop) "Destination reached" else "",
+            arrivalMessage = if (reachedFinalStop) {
+                "You have arrived at $finalStopName (${nextStop.stopCode}) at $finalTime."
             } else {
-                null
+                ""
             }
         )
 
-        val progress = buildTripProgress(updatedState)
-        _uiState.value = updatedState.copy(
-            currentLatitude = progress.first ?: updatedState.currentLatitude,
-            currentLongitude = progress.second ?: updatedState.currentLongitude,
+        val progress = buildTripProgress(arrivedState)
+        _uiState.value = arrivedState.copy(
+            currentLatitude = progress.first ?: arrivedState.currentLatitude,
+            currentLongitude = progress.second ?: arrivedState.currentLongitude,
             tripProgress = progress.third
         )
     }
 
     fun stopTrip() {
         _uiState.value = _uiState.value.copy(
-            activeTrip = _uiState.value.activeTrip?.copy(isActive = false)
+            activeTrip = _uiState.value.activeTrip?.copy(isActive = false),
+            activeLegPath = emptyList(),
+            activeLegStepIndex = 0
+        )
+    }
+
+    /**
+     * Function to close alert dialog after reachign destination
+     */
+    fun dismissArrivalDialog() {
+        _uiState.value = _uiState.value.copy(
+            showArrivalDialog = false,
+            arrivalTitle = "",
+            arrivalMessage = ""
         )
     }
 
@@ -262,12 +425,14 @@ class LiveTripViewModel(
                     suggestion = result.suggestion,
                     baselineTimeline = result.baselineTimeline,
                     transferTimeline = result.transferTimeline,
+                    baselineLegs = result.baselineLegs,
+                    transferLegs = result.transferLegs,
                     journeyMode = JourneyMode.BASELINE,
                     currentTimelineIndex = 0,
                     simulatedTimestamp = firstStop?.arrivalTimestamp ?: trip.simulatedTimestamp,
                     simulatedTimeDisplay = formatTime(firstStop?.arrivalTimestamp ?: trip.simulatedTimestamp),
                     transferDecisionMade = false,
-                    snackbarMessage = null
+                    snackbarMessage = null,
                 )
 
                 val updatedTrip = nextState.activeTrip?.copy(

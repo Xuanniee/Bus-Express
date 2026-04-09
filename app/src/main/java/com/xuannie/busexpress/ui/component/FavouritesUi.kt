@@ -2,9 +2,19 @@ package com.xuannie.busexpress.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Route
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,9 +52,12 @@ fun BusComposableDropDownMenu(
     val expandedMain = remember { mutableStateOf(false) }
 //    val expandedNested = remember { mutableStateOf(false) }
 
+    // Favourite Button Logic Details
+    val coroutineScope = rememberCoroutineScope()
+
     // Three Dot icon
     Box(
-        Modifier
+        modifier = Modifier
             .wrapContentSize(Alignment.TopEnd)
     ) {
         IconButton(
@@ -53,98 +66,119 @@ fun BusComposableDropDownMenu(
                 // and hide the nested menu.
                 expandedMain.value = true
 //                expandedNested.value = false
-            }
+            },
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         ) {
             Icon(
-                Icons.Filled.MoreVert,
+                imageVector = Icons.Filled.MoreVert,
                 contentDescription = "More Menu"
+            )
+        }
+
+        /**
+         * Composable for a small pop-up menu for Settings usually
+         */
+        DropdownMenu(
+            expanded = expandedMain.value,
+            onDismissRequest = { expandedMain.value = false },
+//            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+//            tonalElevation = 6.dp,
+//            shadowElevation = 8.dp
+        ) {
+            /**
+             * For use with Nested Menu
+             */
+//            DropdownMenuItem(
+//                onClick = {
+//                    expandedMain.value = false // hide main menu
+//                    expandedNested.value = true // show nested menu
+//                    menuSelection.value = MenuSelection.NESTED
+//                },
+//                text = {
+//                    Text("Nested Options \u25B6")
+//                },
+//                leadingIcon = {
+//                    Icon(
+//                        imageVector = Icons.Filled.KeyboardArrowRight,
+//                        contentDescription = null
+//                    )
+//                }
+//            )
+
+            DropdownMenuItem(
+                onClick = {
+                    // Update the favouriteUiState to hold the current BusStopCode
+                    favouriteViewModel.updateFavouriteUiState(
+                        favouriteBusStopCode = currentBusStopCode,
+                        goingOut = 0
+                    )
+                    coroutineScope.launch {
+                        // Save it in the Database
+                        favouriteViewModel.saveBusStop()
+                    }
+
+                    // Close Menu after Clicking
+                    expandedMain.value = false
+                    menuSelection.value = MenuSelection.FAVOURITIESOUT
+                },
+                text = {
+                    Text(
+                        text = "Add to Favourites [Going Out]",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Route,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            )
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+            )
+
+            DropdownMenuItem(
+                onClick = {
+                    // Update the favouriteUiState to hold the current BusStopCode
+                    favouriteViewModel.updateFavouriteUiState(
+                        favouriteBusStopCode = currentBusStopCode,
+                        goingOut = 1
+                    )
+                    coroutineScope.launch {
+                        // Save it in the Database
+                        favouriteViewModel.saveBusStop()
+                    }
+
+                    // Close Menu after Clicking
+                    expandedMain.value = false
+                    menuSelection.value = MenuSelection.FAVOURITIESBACK
+                },
+                text = {
+                    Text(
+                        text = "Add to Favourites [Coming Back]",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.DirectionsBus,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             )
         }
     }
 
-    MainMenu(
-        menuSelection = menuSelection,
-        expandedMain = expandedMain,
-        favouriteViewModel = favouriteViewModel,
-        currentBusStopCode = currentBusStopCode,
-//        expandedNested = expandedNested
-    )
 //    NestedMenu(
 //        expandedNested = expandedNested,
 //        nestedMenuSelection = nestedMenuSelection
 //    )
-
-}
-
-/**
- * Composable for a small pop-up menu for Settings usually
- */
-@Composable
-fun MainMenu(
-    menuSelection: MutableState<MenuSelection>,
-    expandedMain: MutableState<Boolean>,
-    favouriteViewModel: FavouriteBusStopViewModel,
-    currentBusStopCode: String,
-//    expandedNested: MutableState<Boolean>
-) {
-    // Favourite Button Logic Details
-    val coroutineScope = rememberCoroutineScope()
-
-    DropdownMenu(
-        expanded = expandedMain.value,
-        onDismissRequest = { expandedMain.value = false },
-    ) {
-        /**
-         * For use with Nested Menu
-         */
-//        DropdownMenuItem(
-//            onClick = {
-//                expandedMain.value = false // hide main menu
-//                expandedNested.value = true // show nested menu
-//                menuSelection.value = MenuSelection.NESTED
-//            }
-//        ) {
-//            Text("Nested Options \u25B6")
-//        }
-
-        Divider()
-
-        DropdownMenuItem(
-            onClick = {
-                // Update the favouriteUiState to hold the current BusStopCode
-                favouriteViewModel.updateFavouriteUiState(favouriteBusStopCode = currentBusStopCode, goingOut = 0)
-                coroutineScope.launch {
-                    // Save it in the Database
-                    favouriteViewModel.saveBusStop()
-                }
-
-                // Close Menu after Clicking
-                expandedMain.value = false
-                menuSelection.value = MenuSelection.FAVOURITIESOUT
-            }
-        ) {
-            Text("Add to Favourites [Going Out]")
-        }
-
-        Divider()
-
-        DropdownMenuItem(
-            onClick = {
-                // Update the favouriteUiState to hold the current BusStopCode
-                favouriteViewModel.updateFavouriteUiState(favouriteBusStopCode = currentBusStopCode, goingOut = 1)
-                coroutineScope.launch {
-                    // Save it in the Database
-                    favouriteViewModel.saveBusStop()
-                }
-
-                // Close Menu after Clicking
-                expandedMain.value = false
-                menuSelection.value = MenuSelection.FAVOURITIESBACK
-            }
-        ) {
-            Text("Add to Favourites [Coming Back]")
-        }
-    }
 }
 
 /**
@@ -157,26 +191,36 @@ fun NestedMenu(
 ) {
     DropdownMenu(
         expanded = expandedNested.value,
-        onDismissRequest = { expandedNested.value = false }
+        onDismissRequest = { expandedNested.value = false },
+//        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+//        tonalElevation = 6.dp,
+//        shadowElevation = 8.dp
     ) {
         DropdownMenuItem(
             onClick = {
                 // close nested menu
                 expandedNested.value = false
                 nestedMenuSelection.value = NestedMenuSelection.FIRST
+            },
+            text = {
+                Text(
+                    text = "First",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
-        ) {
-            Text("First")
-        }
+        )
         DropdownMenuItem(
             onClick = {
                 // close nested menu
                 expandedNested.value = false
                 nestedMenuSelection.value = NestedMenuSelection.SECOND
+            },
+            text = {
+                Text(
+                    text = "Second",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
-        ) {
-            Text("Second")
-        }
+        )
     }
 }
-

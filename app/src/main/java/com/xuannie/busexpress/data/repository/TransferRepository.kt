@@ -1,15 +1,20 @@
 package com.xuannie.busexpress.data.repository
 
+import com.xuannie.busexpress.domain.model.RouteLeg
+import com.xuannie.busexpress.domain.model.RoutePoint
 import com.xuannie.busexpress.domain.model.TimelineStop
 import com.xuannie.busexpress.domain.model.TransferSuggestion
 import com.xuannie.busexpress.network.transfer.TransferApiService
 import com.xuannie.busexpress.network.transfer.TransferSuggestionRequestDto
+import retrofit2.HttpException
 import kotlin.String
 
 data class TransferPlanResult(
     val suggestion: TransferSuggestion,
     val baselineTimeline: List<TimelineStop>,
-    val transferTimeline: List<TimelineStop>
+    val transferTimeline: List<TimelineStop>,
+    val baselineLegs: List<RouteLeg>,
+    val transferLegs: List<RouteLeg>
 )
 
 interface TransferRepository {
@@ -42,7 +47,15 @@ class DefaultTransferRepository(
             baselineDirection = baselineDirection
         )
 
-        val response = transferApiService.getTransferSuggestion(request)
+        val response = try {
+            transferApiService.getTransferSuggestion(request)
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            throw RuntimeException("HTTP ${e.code()}: ${errorBody ?: e.message()}")
+        }
+
+
+//        val response = transferApiService.getTransferSuggestion(request)
 
         val suggestion = TransferSuggestion(
             shouldTransfer = response.shouldTransfer,
@@ -80,10 +93,38 @@ class DefaultTransferRepository(
             )
         }
 
+        val baselineLegs = response.baselineLegs.map { leg ->
+            RouteLeg(
+                fromStopCode = leg.fromStopCode,
+                toStopCode = leg.toStopCode,
+                pathPoints = leg.pathPoints.map { p ->
+                    RoutePoint(
+                        latitude = p.latitude,
+                        longitude = p.longitude
+                    )
+                }
+            )
+        }
+
+        val transferLegs = response.transferLegs.map { leg ->
+            RouteLeg(
+                fromStopCode = leg.fromStopCode,
+                toStopCode = leg.toStopCode,
+                pathPoints = leg.pathPoints.map { p ->
+                    RoutePoint(
+                        latitude = p.latitude,
+                        longitude = p.longitude
+                    )
+                }
+            )
+        }
+
         return TransferPlanResult(
             suggestion = suggestion,
             baselineTimeline = baselineTimeline,
-            transferTimeline = transferTimeline
+            transferTimeline = transferTimeline,
+            baselineLegs = baselineLegs,
+            transferLegs = transferLegs,
         )
     }
 }

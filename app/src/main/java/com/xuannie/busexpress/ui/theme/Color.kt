@@ -3,58 +3,57 @@ package com.xuannie.busexpress.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Light Theme
+ * Light Theme - Dull Blue Palette
  */
-val BlueGrey700 = Color(0xFF455A64)     // Primary
-val DarkBlueGrey = Color(0xFF1C313A)    // Primary Variant Dark
-val LightBlueGrey = Color(0xFF718792)   // Primary Variant Light    / Surface
+val DarkMidnightBlue = Color(0xFF003366)        // Dark Midnight Blue
+val DarkCerulean = Color(0xFF174978)            // Dark Cerulean
+val BdazzledBlue = Color(0xFF2F5F8A)            // B'dazzled Blue
+val QueenBlue = Color(0xFF46769B)               // Queen Blue
+val Rackley = Color(0xFF5E8CAD)                 // Rackley
+val AirSuperiorityBlue = Color(0xFF75A2BF)      // Air Superiority Blue
 
-val BlueWhite = Color(0xFF608E9E)       // Secondary
-val DarkBlueWhite = Color(0xFF326170)   // Secondary Variant Dark
-val LightBlueWhite = Color(0xFF90BECF)  // Secondary Variant Light
+val AirSuperiorityBlueLight = Color(0xFFF2F7FB) // Very light dull blue background
+val DullBlueSurface = Color(0xFFE7F0F7)         // Light surface
+val TextDark = Color(0xFF202124)                // Dark text
+val Red900 = Color(0xFFB71C1C)                  // Error
+val PureWhite = Color(0xFFFFFFFF)
 
-val BlueGrey100 = Color(0xFFECEFF1)     // Background
-val DarkBlueGrey100 = Color(0xFFbabdbe) // Background Variant Dark
-val LightBlueGrey100 = Color(0xFFffffff)// Background Variant Light
+/**
+ * Compatibility aliases for existing theme usage
+ */
+val BluePrimary = DarkCerulean
+val BluePrimaryDark = DarkMidnightBlue
+val BluePrimaryLight = QueenBlue
 
-val Red900 = Color(0xFFb71c1c)          // Error
-val Grey900 = Color(0xFF202124)         // OnSurface & OnPrimary
+val LightBlueAccent = Rackley
+val BlueAccentDark = QueenBlue
+val BlueAccentLight = AirSuperiorityBlue
+
+val BlueBackground = AirSuperiorityBlueLight
+val BlueBackgroundDark = DullBlueSurface
+val BlueBackgroundLight = PureWhite
+
+val LightBlueSurface = DullBlueSurface
 
 /**
  * Dark Theme
  */
-val DarkThemePrimary = Color(0xFF50577A)     // Primary
-val DarkThemeSecondary = Color(0xFF6B728E)   // Secondary
-val DarkThemeSurface = Color(0xFF252e4e)     // Surface
+val DarkBlue = DarkCerulean
+val DarkBlueSecondary = QueenBlue
+val DarkThemeSurface = DarkCerulean
 
-val NavyBlack = Color(0xFF404258)       // Background
-val DarkNavyBlack = Color(0xFF181b2f)   // Background Variant Dark
-val LightNavyBlack = Color(0xFF6b6d85)  // Background Variant Light
+val NavyBlack = DarkMidnightBlue
+val DarkNavyBlack = Color(0xFF00264D)
+val LightNavyBlack = BdazzledBlue
 
-val PurpleBlack = Color(0xFF474E68)     // Background
-val LightPurpleBlack = Color(0xFF737a96)// Background Light Variant
-val DarkPurpleBlack = Color(0xFF1e263d) // Background Dark Variant
+val DeepBlueGrey = BdazzledBlue
+val DeepBlueGreyLight = QueenBlue
+val DeepBlueGreyDark = DarkMidnightBlue
 
-
-
-
-
-val PureWhite = Color(0xFFFFFFFF)
-
-val LightBlue200 = Color(0xFFA2B8CF)
-val Teal300 = Color(0xFF63AFB0)
-
-val LightBlue50 = Color(0xFFe3eeff)
+val LightBlue200 = AirSuperiorityBlue
+val Teal300 = Rackley
+val LightBlue50 = DullBlueSurface
 
 // Dark Theme
-val FloralWhite = Color(0xFFFFFAF1)     // Primary
-val LightBlue800 = Color(0xFF345069)    // Background
-
-
-
-
-
-
-
-
-
+val FloralWhite = Color(0xFFFFFAF1)             // Optional light text alternative
+val LightBlue800 = DarkCerulean                 // Optional dark blue container

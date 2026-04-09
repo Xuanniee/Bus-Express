@@ -1,23 +1,40 @@
 package com.xuannie.busexpress.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -25,14 +42,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.xuannie.busexpress.R
+import androidx.core.content.ContextCompat
 import com.xuannie.busexpress.BusExpressScreen
+import com.xuannie.busexpress.R
 import com.xuannie.busexpress.network.*
 import com.xuannie.busexpress.ui.component.BusStopComposable
 import com.xuannie.busexpress.ui.component.MenuSelection
-import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
+import com.xuannie.busexpress.ui.component.NearbyHeaderBar
+import com.xuannie.busexpress.ui.utils.getCurrentUserLocation
 import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 import com.xuannie.busexpress.ui.viewmodels.BusUiState
+import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -56,12 +76,68 @@ fun SearchScreen(
     // Focus Manager
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    fun loadNearbyUsingRealLocation() {
+        getCurrentUserLocation(context) { location ->
+            if (location != null) {
+                viewModel.loadNearbyStops(
+                    userLatitude = location.latitude,
+                    userLongitude = location.longitude
+                )
+            } else {
+                // fallback if location fails
+                viewModel.loadNearbyStops(1.4053, 103.9023)
+            }
+        }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        if (fineGranted || coarseGranted) {
+            loadNearbyUsingRealLocation()
+        } else {
+            // fallback if user denies permission
+            viewModel.loadNearbyStops(1.4053, 103.9023)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (userInput.value.text.isBlank()) {
+            val fineGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            val coarseGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (fineGranted || coarseGranted) {
+                loadNearbyUsingRealLocation()
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        }
+    }
 
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(5.dp),
     ) {
+        NearbyHeaderBar()
+
         // Search Field for Bus Stop or Bus Numbers
         SearchView(
             label = R.string.search_field_instructions,
@@ -79,7 +155,10 @@ fun SearchScreen(
                 // Close the Onscreen Keyboard
                 focusManager.clearFocus(true)
             },
-            currentScreen = currentScreen
+            currentScreen = currentScreen,
+            onClearSearch = {
+                loadNearbyUsingRealLocation()
+            }
         )
 
         when(busUiState) {
@@ -95,6 +174,15 @@ fun SearchScreen(
                     menuSelection = menuSelection,
                 )
             }
+            is BusUiState.NearbySuccess -> {
+                NearbyStopsScreen(
+                    nearbyStops = busUiState.nearbyStops,
+                    nearbyArrivals = busUiState.nearbyArrivals,
+                    favouriteBusStopViewModel = favouriteBusStopViewModel,
+                    menuSelection = menuSelection,
+                    appViewModel = viewModel
+                )
+            }
             is BusUiState.Loading -> {
                 LoadingScreen()
             }
@@ -102,11 +190,7 @@ fun SearchScreen(
                 ErrorScreen()
             }
         }
-
-
-
     }
-
 }
 
 @Composable
@@ -125,13 +209,15 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
             Image(
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colors.surface),
+                colorFilter = ColorFilter.tint(
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                ),
                 modifier = modifier.size(100.dp)
             )
             Text(
                 text = stringResource(R.string.search_loading_screen_desc),
                 modifier = modifier,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -153,13 +239,13 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             Image(
                 imageVector = Icons.Filled.Error,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colors.surface),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error.copy(alpha = 0.75f)),
                 modifier = modifier.size(100.dp)
             )
             Text(
                 text = stringResource(R.string.loading_failed_flavor_text),
                 modifier = modifier,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -169,6 +255,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 /**
  * The home screen displaying result of fetching photos.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
     busStopDetails: BusStopValue,
@@ -219,10 +306,16 @@ fun ResultScreen(
             modifier = modifier.fillMaxWidth()
         ) {
             // Navigation Bar for Going Out & Coming Back
-            TabRow(
+            PrimaryTabRow(
                 selectedTabIndex = tapRowState,
-                backgroundColor = MaterialTheme.colors.background,
-                contentColor = Color.Black
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.primary,
+                divider = {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                        thickness = 1.dp
+                    )
+                },
             ) {
                 tapRowTitles.forEachIndexed { index, title ->
                     Tab(
@@ -248,7 +341,11 @@ fun ResultScreen(
                         .padding(all = 10.dp)
                 ) {
                     items(busRouteArray1Length) {index ->
-                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                        HorizontalDivider(
+                            thickness = 2.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                            modifier = modifier.padding(5.dp)
+                        )
 
                         BusStopComposable(
                             busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index],
@@ -260,7 +357,11 @@ fun ResultScreen(
                             appViewModel = appViewModel
                         )
 
-                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                        HorizontalDivider(
+                            thickness = 2.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                            modifier = modifier.padding(5.dp)
+                        )
                     }
                 }
             }
@@ -271,7 +372,11 @@ fun ResultScreen(
                         .padding(all = 10.dp)
                 ) {
                     items(busRouteArray2Length) {index ->
-                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                        HorizontalDivider(
+                            thickness = 2.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                            modifier = modifier.padding(5.dp)
+                        )
 
                         BusStopComposable(
                             busArrivalsJSON = busServicesRouteList.busArrivalsJSONList[index+busRouteArray1Length],
@@ -283,7 +388,11 @@ fun ResultScreen(
                             appViewModel = appViewModel
                         )
 
-                        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                        HorizontalDivider(
+                            thickness = 2.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                            modifier = modifier.padding(5.dp)
+                        )
                     }
                 }
             }
@@ -292,19 +401,34 @@ fun ResultScreen(
     }
     else {
         // Bus Stop Code
-        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp)
+        ) {
+            item {
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                    modifier = Modifier.padding(5.dp)
+                )
 
-        BusStopComposable(
-            busArrivalsJSON = busArrivalsJSON,
-            busStopDetailsJSON = busStopDetails,
-            modifier = modifier,
-            busServiceBool = busServiceBool,
-            favouriteViewModel = favouriteBusStopViewModel,
-            menuSelection = menuSelection,
-            appViewModel = appViewModel
-        )
+                BusStopComposable(
+                    busArrivalsJSON = busArrivalsJSON,
+                    busStopDetailsJSON = busStopDetails,
+                    busServiceBool = busServiceBool,
+                    favouriteViewModel = favouriteBusStopViewModel,
+                    menuSelection = menuSelection,
+                    appViewModel = appViewModel
+                )
 
-        Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                    modifier = Modifier.padding(5.dp)
+                )
+            }
+        }
     }
 }
 
@@ -317,29 +441,31 @@ fun SearchView(
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions,
     onKeyboardSearch: () -> Unit,
+    onClearSearch: () -> Unit,
 ) {
     Column{
         Surface(
             modifier = modifier
                 .padding(3.dp),
             shape = RoundedCornerShape(15),
-            color =  MaterialTheme.colors.surface,
-            elevation = 20.dp
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            shadowElevation = 6.dp
         ) {
             TextField(
                 value = state.value,
                 onValueChange = {value ->
                     state.value = value
                 },
-                enabled = currentScreen == BusExpressScreen.Search,
+                enabled = currentScreen == BusExpressScreen.Default,
                 placeholder = {
                     if (state.value == TextFieldValue("")) {
                         Text(
                             stringResource(id = label),
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onPrimary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                         )
                     }
@@ -363,6 +489,7 @@ fun SearchView(
                         IconButton(onClick = {
                             // Clear the Search Field
                             state.value = TextFieldValue("")
+                            onClearSearch()
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
@@ -372,16 +499,26 @@ fun SearchView(
                         }
                     }
                 },
-                colors = TextFieldDefaults.textFieldColors(
-                    cursorColor = MaterialTheme.colors.onPrimary,
-                    focusedIndicatorColor = Color.Transparent,      // Refers to the Bottom Line in TextField
-                    unfocusedIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    backgroundColor = MaterialTheme.colors.surface,
-                    leadingIconColor = MaterialTheme.colors.onPrimary,
-                    trailingIconColor = MaterialTheme.colors.onPrimary,
-                    placeholderColor = MaterialTheme.colors.onPrimary
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                    unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                    disabledIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                    focusedLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    focusedTrailingIconColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurface,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = { onKeyboardSearch() }

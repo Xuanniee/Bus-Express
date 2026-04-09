@@ -8,10 +8,14 @@ import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
 import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 import com.xuannie.busexpress.ui.theme.BusExpressTheme
 import com.xuannie.busexpress.ui.viewmodels.LiveTripViewModel
+import org.maplibre.android.MapLibre
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize MapLibre before creating any view
+        MapLibre.getInstance(this)
         setContent {
             BusExpressTheme {
                 val viewModel: AppViewModel =

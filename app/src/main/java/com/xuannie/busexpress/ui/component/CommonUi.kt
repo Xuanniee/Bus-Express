@@ -4,7 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -25,7 +30,6 @@ import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 
 @Composable
 fun BusStopComposable(
@@ -62,13 +66,18 @@ fun BusStopComposable(
                 // Description of Bus Stop
                 Text(
                     text = busStopDetailsJSON.busStopDescription,
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
 
                 // Bus Stop Road & Code
                 Text(
                     text = "${busStopDetailsJSON.busStopRoadName} ($currentBusStopCode)",
-                    style = MaterialTheme.typography.body1
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
 
             }
@@ -116,19 +125,31 @@ fun BusStopComposable(
             }
             else {
                 // Only 1 Bus Stop
-                LazyColumn(
+                Column(
                     modifier = modifier
                         .fillMaxWidth()
                         .padding(all = 10.dp)
                 ) {
-                    // Shows Arrival Timing when User provides Bus Stop Code
-                    items(currentBusStopServices) { currentBusStopService ->
+                    currentBusStopServices.forEach { currentBusStopService ->
                         ExpandedBusStop(
                             currentBusStopService = currentBusStopService,
                             modifier = Modifier.padding(3.dp)
                         )
                     }
                 }
+//                LazyColumn(
+//                    modifier = modifier
+//                        .fillMaxWidth()
+//                        .padding(all = 10.dp)
+//                ) {
+//                    // Shows Arrival Timing when User provides Bus Stop Code
+//                    items(currentBusStopServices) { currentBusStopService ->
+//                        ExpandedBusStop(
+//                            currentBusStopService = currentBusStopService,
+//                            modifier = Modifier.padding(3.dp)
+//                        )
+//                    }
+//                }
             }
         }
     }
@@ -155,7 +176,7 @@ fun BusComposableRefreshButton(
     IconButton(onClick = onClick) {
         Icon(
             imageVector = Icons.Filled.Refresh,
-            tint = MaterialTheme.colors.secondary,
+            tint = MaterialTheme.colorScheme.primary,
             contentDescription = stringResource(R.string.refresh_busCard_desc)
         )
     }
@@ -170,198 +191,144 @@ fun BusComposableExpandButton(
     IconButton(onClick = onClick) {
         Icon(
             imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-            tint = MaterialTheme.colors.secondary,
+            tint = MaterialTheme.colorScheme.primary,
             contentDescription = stringResource(R.string.bus_stop_expand_more_desc)
         )
 
     }
 }
 
+@Composable
+fun ArrivalColumn(
+    eta: String,
+    occupancyImage: Int,
+    occupancyDesc: Int,
+    busType: Int,
+    wheelchairIcon: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
+        Text(
+            text = eta,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        if (occupancyImage != 0) {
+            Image(
+                painter = painterResource(id = occupancyImage),
+                contentDescription = stringResource(id = occupancyDesc),
+                modifier = Modifier
+                    .width(28.dp)
+                    .height(8.dp)
+            )
+        } else {
+            Spacer(
+                modifier = Modifier
+                    .width(28.dp)
+                    .height(8.dp)
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (busType != 0) {
+                Text(
+                    text = stringResource(id = busType),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 7.sp,
+                    maxLines = 1
+                )
+            }
+
+            if (wheelchairIcon != 0) {
+                Spacer(modifier = Modifier.width(2.dp))
+                Image(
+                    painter = painterResource(id = wheelchairIcon),
+                    contentDescription = "Bus is wheelchair accessible.",
+                    modifier = Modifier.size(12.dp)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun ExpandedBusStop(
     modifier: Modifier = Modifier,
     currentBusStopService: SingaporeBusServices,
 ) {
-    // Array holding the Next 3 Bus Objects
-    val nextBusArray = arrayListOf(
+    val nextBusArray = listOf(
         currentBusStopService.nextBus1,
         currentBusStopService.nextBus2,
         currentBusStopService.nextBus3
     )
 
-    val nextBusEtaArray = determineTimeArrival(nextBusArray = nextBusArray)
-    val nextBusOccupancyArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyArray
-    val nextBusOccupancyDescArray = determineOccupancyBus(nextBusArray = nextBusArray).nextBusOccupancyDescArray
-    val nextBusWheelchairArray = determineWheelchairAccessibility(nextBusArray = nextBusArray)
-    val nextBusTypeArray = determineTypeBus(nextBusArray = nextBusArray)
-    val currentBusService = currentBusStopService.busServiceNumber
+    val nextBusEtaArray = determineTimeArrival(nextBusArray)
+    val occupancyResults = determineOccupancyBus(nextBusArray)
+    val nextBusOccupancyArray = occupancyResults.nextBusOccupancyArray
+    val nextBusOccupancyDescArray = occupancyResults.nextBusOccupancyDescArray
+    val nextBusWheelchairArray = determineWheelchairAccessibility(nextBusArray)
+    val nextBusTypeArray = determineTypeBus(nextBusArray)
 
-    Divider(
+    HorizontalDivider(
         thickness = 1.dp,
-        modifier = modifier.padding(1.dp),
-        color = MaterialTheme.colors.secondary
+        modifier = Modifier.padding(vertical = 1.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
     )
 
-    Row {
-        // Bus Service Number
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
-            text = currentBusService,
-            style = MaterialTheme.typography.h5,
-            modifier = modifier.weight(2f),
-            fontWeight = FontWeight.Bold
+            text = currentBusStopService.busServiceNumber,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1.2f),
+            maxLines = 1
         )
 
-        Spacer(modifier = modifier.weight(1f))
+        ArrivalColumn(
+            eta = nextBusEtaArray[0],
+            occupancyImage = nextBusOccupancyArray[0],
+            occupancyDesc = nextBusOccupancyDescArray[0],
+            busType = nextBusTypeArray[0],
+            wheelchairIcon = nextBusWheelchairArray[0],
+            modifier = Modifier.weight(1f)
+        )
 
-        // Waiting Time + Occupancy Rate for each Incoming Bus
-        Column(
-            modifier = modifier.weight(1f)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = nextBusEtaArray[0],
-                    style = MaterialTheme.typography.body2,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+        ArrivalColumn(
+            eta = nextBusEtaArray[1],
+            occupancyImage = nextBusOccupancyArray[1],
+            occupancyDesc = nextBusOccupancyDescArray[1],
+            busType = nextBusTypeArray[1],
+            wheelchairIcon = nextBusWheelchairArray[1],
+            modifier = Modifier.weight(1f)
+        )
 
-            // TODO Replace with Infographic
-            if (nextBusOccupancyArray[0] != 0) {
-                Image(
-                    painter = painterResource(id = nextBusOccupancyArray[0]),
-                    contentDescription = stringResource(id = nextBusOccupancyDescArray[0])
-                )
-            }
-
-            // Wheelchair + Bus Type
-            Row {
-                // Bus Type
-                if (nextBusTypeArray[0] != 0) {
-                    Text(
-                        text = stringResource(id = nextBusTypeArray[0]),
-                        style = MaterialTheme.typography.body2,
-                        modifier = modifier.weight(2f),
-                        maxLines = 1,
-                        fontSize = 8.sp
-                    )
-                }
-
-                if (nextBusWheelchairArray[0] != 0) {
-                    // Wheelchair Exists
-                    Image(
-                        painter = painterResource(id = nextBusWheelchairArray[0]),
-                        contentDescription = "Bus is wheelchair accessible.",
-                        modifier = modifier.weight(1f)
-                    )
-                }
-            }
-
-        }
-
-        Column(
-            modifier = modifier.weight(1f)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = nextBusEtaArray[1],
-                    style = MaterialTheme.typography.body2,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            // TODO Replace with Infographic
-            if (nextBusOccupancyArray[1] != 0) {
-                Image(
-                    painter = painterResource(id = nextBusOccupancyArray[1]),
-                    contentDescription = stringResource(id = nextBusOccupancyDescArray[1])
-                )
-            }
-
-            // Wheelchair + Bus Type
-            Row {
-                // Bus Type
-                if (nextBusTypeArray[1] != 0) {
-                    Text(
-                        text = stringResource(id = nextBusTypeArray[1]),
-                        style = MaterialTheme.typography.body2,
-                        modifier = modifier.weight(2f),
-                        maxLines = 1,
-                        fontSize = 8.sp
-                    )
-                }
-
-                if (nextBusWheelchairArray[1] != 0) {
-                    // Wheelchair Exists
-                    Image(
-                        painter = painterResource(id = nextBusWheelchairArray[1]),
-                        contentDescription = "Bus is wheelchair accessible.",
-                        modifier = modifier.weight(1f)
-                    )
-                }
-            }
-        }
-
-        Column(
-            modifier = modifier.weight(1f)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = nextBusEtaArray[2],
-                    style = MaterialTheme.typography.body2,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            // TODO Replace with Infographic
-            if (nextBusOccupancyArray[2] != 0) {
-                Image(
-                    painter = painterResource(id = nextBusOccupancyArray[2]),
-                    contentDescription = stringResource(id = nextBusOccupancyDescArray[2])
-                )
-            }
-
-            // Wheelchair + Bus Type
-            Row{
-                // Bus Type
-                if (nextBusTypeArray[2] != 0) {
-                    Text(
-                        text = stringResource(id = nextBusTypeArray[2]),
-                        style = MaterialTheme.typography.body2,
-                        modifier = modifier.weight(2f),
-                        maxLines = 1,
-                        fontSize = 8.sp
-                    )
-                }
-
-                if (nextBusWheelchairArray[2] != 0) {
-                    // Wheelchair Exists
-                    Image(
-                        painter = painterResource(id = nextBusWheelchairArray[2]),
-                        contentDescription = "Bus is wheelchair accessible.",
-                        modifier = modifier.weight(1f)
-                    )
-                }
-            }
-        }
+        ArrivalColumn(
+            eta = nextBusEtaArray[2],
+            occupancyImage = nextBusOccupancyArray[2],
+            occupancyDesc = nextBusOccupancyDescArray[2],
+            busType = nextBusTypeArray[2],
+            wheelchairIcon = nextBusWheelchairArray[2],
+            modifier = Modifier.weight(1f)
+        )
     }
 
-    Divider(
+    HorizontalDivider(
         thickness = 1.dp,
-        modifier = modifier.padding(1.dp),
-        color = MaterialTheme.colors.secondary
+        modifier = Modifier.padding(vertical = 1.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
     )
 }
 

@@ -45,6 +45,9 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
     private val _multipleBusStopNameUiState = MutableStateFlow(BusStopValue())
 //    val multipleBusStopNameUiState: StateFlow<BusStopValue> = _multipleBusStopNameUiState.asStateFlow()
 
+    // Cache the Nearby Bus Stops
+    private var cachedBusStops: List<BusStopValue>? = null
+
     /**
      * StateFlow
      */
@@ -338,6 +341,92 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
         }
     }
 
+    private fun distanceInMeters(
+        lat1: Double,
+        lon1: Double,
+        lat2: Double,
+        lon2: Double
+    ): Float {
+        val results = FloatArray(1)
+        android.location.Location.distanceBetween(
+            lat1,
+            lon1,
+            lat2,
+            lon2,
+            results
+        )
+        return results[0]
+    }
+
+    private suspend fun getAllBusStops(): List<BusStopValue> {
+        cachedBusStops?.let { return it }
+
+        val allStops = mutableListOf<BusStopValue>()
+        var skipIndex = 0
+        var shouldContinue = true
+
+        while (shouldContinue) {
+            val result = singaporeBusRepository.getBusDetails(numRecordsToSkip = skipIndex)
+            val currentStops = result.value
+
+            if (currentStops.isEmpty()) {
+                shouldContinue = false
+            } else {
+                allStops.addAll(currentStops)
+                skipIndex += currentStops.size
+            }
+        }
+
+        cachedBusStops = allStops
+        return allStops
+    }
+
+    /**
+     * Function to get nearby bus stops
+     */
+    fun loadNearbyStops(userLatitude: Double, userLongitude: Double) {
+        viewModelScope.launch {
+            // Loading first
+            busUiState = BusUiState.Loading
+
+            try {
+                val allBusStops = getAllBusStops()
+
+                val nearestStops = allBusStops
+                    .map { busStop ->
+                        val distance = distanceInMeters(
+                            userLatitude,
+                            userLongitude,
+                            busStop.latitude,
+                            busStop.longitude
+                        )
+                        busStop to distance
+                    }
+                    .sortedBy { it.second }
+                    .take(5)
+                    .map { it.first }
+
+                val arrivals = nearestStops.map { stop ->
+                    singaporeBusRepository.getBusTimings(
+                        busStopCode = stop.busStopCode,
+                        busServiceNumber = null
+                    )
+                }
+
+                busUiState = BusUiState.NearbySuccess(
+                    nearbyStops = nearestStops,
+                    nearbyArrivals = arrivals
+                )
+            } catch (e: IOException) {
+                busUiState = BusUiState.Error
+            } catch (e: HttpException) {
+                busUiState = BusUiState.Error
+            } catch (e: Exception) {
+                busUiState = BusUiState.Error
+            }
+        }
+    }
+
     // Factory Object to retrieve the singaporeBusRepository and pass it to the ViewModel
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -355,6 +444,11 @@ class AppViewModel(private val singaporeBusRepository: SingaporeBusRepository): 
 // like Loading, Error, and Success
 sealed interface BusUiState {
     data class Success(val busTimings: SingaporeBus) : BusUiState
+    // Nearby Stops will return a list of Bus Stops
+    data class NearbySuccess(
+        val nearbyStops: List<BusStopValue>,
+        val nearbyArrivals: List<SingaporeBus>
+    ): BusUiState
     // The 2 States below need not set new data and create new objects, which is why an object is sufficient for the web response
     object Error: BusUiState
     object Loading: BusUiState

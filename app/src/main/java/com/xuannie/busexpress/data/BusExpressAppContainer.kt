@@ -11,6 +11,7 @@ import com.xuannie.busexpress.data.local.BusStopAssetRepository
 import com.xuannie.busexpress.data.repository.DefaultTransferRepository
 import com.xuannie.busexpress.data.repository.TransferRepository
 import com.xuannie.busexpress.network.transfer.TransferApiService
+import com.xuannie.busexpress.ui.config.MapConfig.PYTHON_SERVER_URL
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -29,7 +30,7 @@ class DefaultAppContainer(private val context: Context): AppContainer {
 
     private val BASE_URL = "https://datamall2.mytransport.sg/ltaodataservice/"
     // Python Server Base
-    private val TRANSFER_BASE_URL = "http://10.0.2.2:8000/"
+    private val TRANSFER_BASE_URL = PYTHON_SERVER_URL
 
 
     private val json = Json {
@@ -62,6 +63,7 @@ class DefaultAppContainer(private val context: Context): AppContainer {
 
     // CHANGED: separate client for your Python backend
     private val transferClient = OkHttpClient.Builder()
+        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
                 .addHeader("accept", "application/json")

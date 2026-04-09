@@ -1,13 +1,16 @@
 package com.xuannie.busexpress.ui.screens
 
+
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -20,6 +23,7 @@ import com.xuannie.busexpress.ui.viewmodels.FavouriteBusStopViewModel
 import com.xuannie.busexpress.ui.viewmodels.AppViewModel
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun FavouritesScreen(
@@ -48,11 +52,16 @@ fun FavouritesScreen(
 
     Column {
         // Navigation Bar for Going Out & Coming Back
-        TabRow(
+        PrimaryTabRow(
             selectedTabIndex = tapRowState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary,
             divider = {
-                Divider(thickness = 3.dp)
-            },
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)
+                )
+            }
         ) {
             tapRowTitles.forEachIndexed { index, title ->
                 Tab(
@@ -73,7 +82,11 @@ fun FavouritesScreen(
             ) {
                 for (index in 0..goingOutLength) {
                     // UI Layer
-                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        modifier = modifier.padding(5.dp)
+                    )
 
                     BusStopComposable(
                         busArrivalsJSON = singaporeBusGoingOutList[index],
@@ -85,7 +98,11 @@ fun FavouritesScreen(
                         appViewModel = appViewModel
                     )
 
-                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        modifier = modifier.padding(5.dp)
+                    )
                 }
             }
         }
@@ -98,7 +115,11 @@ fun FavouritesScreen(
             ) {
                 for (index in 0..comingBackLength) {
                     // UI Layer
-                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        modifier = modifier.padding(5.dp)
+                    )
 
                     BusStopComposable(
                         busArrivalsJSON = singaporeBusComingBackList[index],
@@ -110,7 +131,11 @@ fun FavouritesScreen(
                         appViewModel = appViewModel
                     )
 
-                    Divider(thickness = 2.dp, modifier = modifier.padding(5.dp))
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        modifier = modifier.padding(5.dp)
+                    )
                 }
             }
         }

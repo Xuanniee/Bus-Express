@@ -84,5 +84,32 @@ data class TransferSuggestionResponseDto(
     val baselineTimeline: List<TimelineStopDto> = emptyList(),
 
     @SerialName("transfer_timeline")
-    val transferTimeline: List<TimelineStopDto> = emptyList()
+    val transferTimeline: List<TimelineStopDto> = emptyList(),
+
+    @SerialName("baseline_legs")
+    val baselineLegs: List<RouteLegDto> = emptyList(),
+
+    @SerialName("transfer_legs")
+    val transferLegs: List<RouteLegDto> = emptyList()
+)
+
+/**
+ * For marking out the coordinates that the user should travel on the roads
+ */
+@Serializable
+@kotlinx.serialization.InternalSerializationApi
+data class RoutePointDto(
+    val latitude: Double,
+    val longitude: Double
+)
+
+@Serializable
+@kotlinx.serialization.InternalSerializationApi
+data class RouteLegDto(
+    @SerialName("from_stop_code")
+    val fromStopCode: String,
+    @SerialName("to_stop_code")
+    val toStopCode: String,
+    @SerialName("path_points")
+    val pathPoints: List<RoutePointDto>
 )
